@@ -1,36 +1,84 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# DATAPREV Estudos
 
-## Getting Started
+Plataforma de estudos para o concurso DATAPREV 2026 (FGV) — dashboard, questões,
+simulados, flashcards, cronograma, biblioteca de materiais e tutor de IA.
 
-First, run the development server:
+## Stack
+
+- Next.js 16 (App Router) + React 19 + TypeScript
+- Tailwind CSS + Radix UI
+- Prisma + PostgreSQL
+- Autenticação própria (JWT + cookie httpOnly + bcrypt)
+- IA: [OpenRouter](https://openrouter.ai) com o modelo `nvidia/nemotron-3-ultra-550b-a55b:free`
+- Gráficos: Recharts
+
+## Configuração do zero
+
+### 1. Instalar dependências
+
+```bash
+npm install
+```
+
+### 2. Configurar variáveis de ambiente
+
+Copie `.env.example` para `.env` e preencha:
+
+```bash
+cp .env.example .env
+```
+
+- `DATABASE_URL` / `DIRECT_URL`: string de conexão PostgreSQL (pode usar
+  [Supabase](https://supabase.com), [Neon](https://neon.tech) ou Postgres local).
+- `JWT_SECRET`: qualquer string longa e aleatória (ex: `openssl rand -hex 32`).
+- `OPENROUTER_API_KEY`: gerada em https://openrouter.ai/keys (necessária para o
+  tutor de IA — a chave fica só no servidor, nunca é exposta no navegador).
+- `OPENROUTER_MODEL`: já vem preenchida com o modelo gratuito da Nemotron.
+
+### 3. Criar o banco de dados
+
+```bash
+npx prisma generate
+npx prisma db push
+```
+
+### 4. Rodar
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abra http://localhost:3000 — você será redirecionado para `/login`. Clique em
+"Criar conta" para se cadastrar (não há usuários pré-criados).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Funcionalidades
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Login/Cadastro** (`/login`, `/registro`): autenticação real com senha
+  criptografada (bcrypt) e sessão via cookie JWT. Todas as rotas do dashboard
+  são protegidas por middleware — sem login, redireciona automaticamente.
+- **Biblioteca** (`/biblioteca`): upload real de arquivos de estudo (PDF, TXT,
+  MD, etc.) ou links, com tags. Arquivos ficam em `public/uploads/{userId}/`.
+  Arquivos de texto (`.txt`, `.md`, `.csv`, `.json`) têm o conteúdo extraído
+  automaticamente para servir de contexto ao tutor de IA.
+- **Tutor de IA** (`/ia`): conversa com a Nemotron via OpenRouter, com prompt
+  especializado no edital da DATAPREV/FGV.
+- **Estatísticas** (`/estatisticas`): gráficos (pizza, barras) de progresso e
+  desempenho por matéria.
+- **Dashboard, Questões, Simulados, Flashcards, Cronograma, Revisões, Metas,
+  Conquistas**: já existentes no projeto original.
 
-## Learn More
+## Resetar o banco de dados
 
-To learn more about Next.js, take a look at the following resources:
+Para apagar tudo e recomeçar do zero:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npx prisma db push --force-reset
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Deploy
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Funciona em qualquer plataforma que rode Next.js (Vercel, Railway, etc.).
+Lembre-se de configurar as mesmas variáveis de ambiente do `.env` lá, e de que
+o armazenamento de arquivos em `public/uploads` é local ao servidor — em
+produção com múltiplas instâncias, migre para um storage externo (ex:
+Supabase Storage, já incluso como dependência do projeto).

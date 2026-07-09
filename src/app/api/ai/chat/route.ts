@@ -40,43 +40,65 @@ DIRETRIZES DE RESPOSTA:
 9. Quando solicitado /flashcard, crie flashcards no formato: FRENTE: [pergunta] | VERSO: [resposta]
 10. Quando solicitado /cronograma, pergunte sobre horas disponíveis e matérias prioritárias`;
 
+const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
+const DEFAULT_MODEL = "nvidia/nemotron-3-ultra-550b-a55b:free";
+
 export async function POST(request: NextRequest) {
   try {
-    const { messages } = await request.json();
+    const { messages, context } = await request.json();
 
-    const ollamaUrl = process.env.OLLAMA_BASE_URL || "http://localhost:11434";
-    const model = process.env.OLLAMA_MODEL || "llama3.2";
+    const apiKey = process.env.OPENROUTER_API_KEY;
+    if (!apiKey) {
+      return NextResponse.json(
+        {
+          error:
+            "OPENROUTER_API_KEY não configurada no servidor. Adicione-a no arquivo .env.",
+        },
+        { status: 500 }
+      );
+    }
 
-    const ollamaMessages = [
-      { role: "system", content: SYSTEM_PROMPT },
+    const model = process.env.OPENROUTER_MODEL || DEFAULT_MODEL;
+
+    const systemContent = context
+      ? `${SYSTEM_PROMPT}\n\nMATERIAL DE ESTUDO ENVIADO PELO USUÁRIO (use como contexto quando relevante):\n${context}`
+      : SYSTEM_PROMPT;
+
+    const orMessages = [
+      { role: "system", content: systemContent },
       ...messages,
     ];
 
-    const response = await fetch(`${ollamaUrl}/api/chat`, {
+    const response = await fetch(OPENROUTER_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+        "HTTP-Referer": process.env.APP_URL || "http://localhost:3000",
+        "X-Title": "DATAPREV Estudos",
+      },
       body: JSON.stringify({
         model,
-        messages: ollamaMessages,
-        stream: false,
-        options: {
-          temperature: 0.7,
-          top_p: 0.9,
-        },
+        messages: orMessages,
+        temperature: 0.7,
+        top_p: 0.9,
       }),
     });
 
     if (!response.ok) {
+      const errText = await response.text();
+      console.error("OpenRouter error:", response.status, errText);
       return NextResponse.json(
-        { error: "Ollama not available" },
-        { status: 503 }
+        { error: "Não foi possível obter resposta da IA (OpenRouter)." },
+        { status: 502 }
       );
     }
 
     const data = await response.json();
-    return NextResponse.json({
-      response: data.message?.content || "Não consegui gerar uma resposta.",
-    });
+    const content =
+      data.choices?.[0]?.message?.content ?? "Não consegui gerar uma resposta.";
+
+    return NextResponse.json({ response: content });
   } catch (error) {
     console.error("AI chat error:", error);
     return NextResponse.json(

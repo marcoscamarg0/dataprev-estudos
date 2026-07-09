@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useUIStore, useAuthStore } from "@/store";
 import { cn, getDaysUntil, EXAM_DATE } from "@/lib/utils";
@@ -79,6 +79,7 @@ interface AppLayoutProps {
 
 export function AppLayout({ children }: AppLayoutProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const { sidebarCollapsed, toggleSidebar, setGlobalSearchOpen } = useUIStore();
   const { user, logout } = useAuthStore();
   const { theme, setTheme } = useTheme();
@@ -304,6 +305,20 @@ export function AppLayout({ children }: AppLayoutProps) {
                 )}
               </div>
             </Link>
+
+            {/* Logout */}
+            <Button
+              variant="ghost"
+              size="icon"
+              title="Sair"
+              onClick={async () => {
+                await fetch("/api/auth/logout", { method: "POST" });
+                logout();
+                router.push("/login");
+              }}
+            >
+              <LogOut size={15} />
+            </Button>
           </div>
         </header>
 
