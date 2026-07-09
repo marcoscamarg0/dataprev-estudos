@@ -37,44 +37,7 @@ interface Note {
   wordCount: number;
 }
 
-const MOCK_NOTES: Note[] = [
-  {
-    id: "n1",
-    title: "Spring IoC — Resumo Completo",
-    preview: "O container IoC (Inversion of Control) do Spring é responsável por criar, configurar e gerenciar os beans da aplicação. A Injeção de Dependência (DI) é a implementação mais comum do IoC...",
-    subjectName: "Spring Framework",
-    subjectColor: "#22c55e",
-    updatedAt: new Date(Date.now() - 3600000),
-    wordCount: 842,
-  },
-  {
-    id: "n2",
-    title: "Docker — Comandos Essenciais",
-    preview: "docker build, docker run, docker ps, docker stop, docker rm, docker images, docker pull, docker push, docker exec, docker logs...",
-    subjectName: "Docker e Kubernetes",
-    subjectColor: "#0ea5e9",
-    updatedAt: new Date(Date.now() - 86400000),
-    wordCount: 412,
-  },
-  {
-    id: "n3",
-    title: "SOLID — Os 5 Princípios com Exemplos Java",
-    preview: "S - Single Responsibility: uma classe deve ter apenas um motivo para mudar. O - Open/Closed: aberta para extensão, fechada para modificação...",
-    subjectName: "Clean Code",
-    subjectColor: "#fbbf24",
-    updatedAt: new Date(Date.now() - 2 * 86400000),
-    wordCount: 1203,
-  },
-  {
-    id: "n4",
-    title: "SQL — Joins, Subqueries e Window Functions",
-    preview: "INNER JOIN retorna apenas registros com correspondência em ambas as tabelas. LEFT JOIN retorna todos os registros da tabela esquerda...",
-    subjectName: "Banco de Dados",
-    subjectColor: "#84cc16",
-    updatedAt: new Date(Date.now() - 3 * 86400000),
-    wordCount: 956,
-  },
-];
+const MOCK_NOTES: Note[] = [];
 
 const TOOLBAR_ACTIONS = [
   { icon: Heading1, label: "H1", action: "heading1" },

@@ -65,38 +65,7 @@ const SIMULADO_TYPES = [
   },
 ];
 
-const MOCK_RESULTS = [
-  {
-    id: "r1",
-    title: "Simulado Completo #3",
-    date: "05/07/2026",
-    score: 74,
-    correct: 67,
-    total: 90,
-    time: "3h 42min",
-    type: "full",
-  },
-  {
-    id: "r2",
-    title: "Simulado Rápido #8",
-    date: "03/07/2026",
-    score: 80,
-    correct: 16,
-    total: 20,
-    time: "24min",
-    type: "quick",
-  },
-  {
-    id: "r3",
-    title: "Adaptativo — Java/Spring",
-    date: "01/07/2026",
-    score: 67,
-    correct: 20,
-    total: 30,
-    time: "38min",
-    type: "adaptive",
-  },
-];
+const MOCK_RESULTS: any[] = [];
 
 export default function SimuladosPage() {
   const [selectedType, setSelectedType] = useState<string | null>(null);
@@ -113,10 +82,10 @@ export default function SimuladosPage() {
       {/* Stats */}
       <div className="grid grid-cols-4 gap-3 mb-6">
         {[
-          { label: "Simulados feitos", value: "12", icon: "📋", color: "text-foreground" },
-          { label: "Média de pontuação", value: "71%", icon: "📊", color: "text-chart-2" },
-          { label: "Melhor resultado", value: "84%", icon: "🏆", color: "text-amber-500" },
-          { label: "Questões respondidas", value: "1.080", icon: "✅", color: "text-chart-1" },
+          { label: "Simulados feitos", value: "0", icon: "📋", color: "text-foreground" },
+          { label: "Média de pontuação", value: "0%", icon: "📊", color: "text-chart-2" },
+          { label: "Melhor resultado", value: "0%", icon: "🏆", color: "text-amber-500" },
+          { label: "Questões respondidas", value: "0", icon: "✅", color: "text-chart-1" },
         ].map((s) => (
           <Card key={s.label}>
             <CardContent className="p-4">
@@ -200,6 +169,11 @@ export default function SimuladosPage() {
         <div className="col-span-5">
           <h2 className="text-sm font-semibold mb-3">Resultados Recentes</h2>
           <div className="space-y-3">
+            {MOCK_RESULTS.length === 0 && (
+              <div className="text-center py-8 text-muted-foreground">
+                <p className="text-sm">Nenhum simulado realizado ainda.</p>
+              </div>
+            )}
             {MOCK_RESULTS.map((result) => (
               <Card key={result.id} className="card-hover cursor-pointer">
                 <CardContent className="p-4">
@@ -258,9 +232,9 @@ export default function SimuladosPage() {
               </div>
               <div className="space-y-2">
                 {[
-                  { label: "Conhecimentos Gerais", note: 60, goal: 60 },
-                  { label: "Conhecimentos Específicos", note: 68, goal: 70 },
-                  { label: "Média Geral", note: 71, goal: 65 },
+                  { label: "Conhecimentos Gerais", note: 0, goal: 60 },
+                  { label: "Conhecimentos Específicos", note: 0, goal: 70 },
+                  { label: "Média Geral", note: 0, goal: 65 },
                 ].map((item) => (
                   <div key={item.label}>
                     <div className="flex justify-between text-[10px] text-muted-foreground mb-1">

@@ -59,6 +59,8 @@ export async function POST(request: NextRequest) {
     }
 
     const model = process.env.OPENROUTER_MODEL || DEFAULT_MODEL;
+    
+    console.log(`🤖 [OpenRouter] Iniciando requisição para o modelo: ${model}`);
 
     const systemContent = context
       ? `${SYSTEM_PROMPT}\n\nMATERIAL DE ESTUDO ENVIADO PELO USUÁRIO (use como contexto quando relevante):\n${context}`
@@ -95,6 +97,8 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await response.json();
+    console.log("✅ [OpenRouter] Resposta recebida com sucesso da IA.");
+    
     const content =
       data.choices?.[0]?.message?.content ?? "Não consegui gerar uma resposta.";
 

@@ -8,6 +8,8 @@ export interface User {
   avatar?: string;
   examDate?: string;
   dailyGoalHours: number;
+  role: string;
+  totalXp: number;
 }
 
 interface AuthState {

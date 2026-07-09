@@ -47,87 +47,84 @@ import Link from "next/link";
 
 // Mock data — será substituído por dados reais da API
 const weeklyData = [
-  { day: "Seg", hours: 3.5, questions: 40 },
-  { day: "Ter", hours: 4.2, questions: 55 },
-  { day: "Qua", hours: 2.8, questions: 30 },
-  { day: "Qui", hours: 5.1, questions: 70 },
-  { day: "Sex", hours: 3.9, questions: 48 },
-  { day: "Sáb", hours: 6.0, questions: 80 },
-  { day: "Dom", hours: 2.0, questions: 20 },
+  { day: "Seg", hours: 0, questions: 0 },
+  { day: "Ter", hours: 0, questions: 0 },
+  { day: "Qua", hours: 0, questions: 0 },
+  { day: "Qui", hours: 0, questions: 0 },
+  { day: "Sex", hours: 0, questions: 0 },
+  { day: "Sáb", hours: 0, questions: 0 },
+  { day: "Dom", hours: 0, questions: 0 },
 ];
 
 const radarData = [
-  { subject: "Java", value: 72 },
-  { subject: "Spring", value: 55 },
-  { subject: "REST", value: 80 },
-  { subject: "Docker", value: 48 },
-  { subject: "BD", value: 65 },
-  { subject: "Redes", value: 40 },
-  { subject: "DevOps", value: 35 },
-  { subject: "Testes", value: 60 },
+  { subject: "Java", value: 0 },
+  { subject: "Spring", value: 0 },
+  { subject: "REST", value: 0 },
+  { subject: "Docker", value: 0 },
+  { subject: "BD", value: 0 },
+  { subject: "Redes", value: 0 },
+  { subject: "DevOps", value: 0 },
+  { subject: "Testes", value: 0 },
 ];
 
-const upcomingRevisions = [
-  { topic: "Java — Generics", date: "Hoje", interval: "7 dias" },
-  { topic: "Spring Boot — Auto-config", date: "Amanhã", interval: "15 dias" },
-  { topic: "Docker — Compose", date: "Em 3 dias", interval: "30 dias" },
-];
-
-const recentActivity = [
-  { type: "question", text: "20 questões de Java", time: "há 2h", correct: 16 },
-  { type: "flashcard", text: "30 flashcards de Spring", time: "há 4h", correct: 25 },
-  { type: "study", text: "Estudo Docker (1h 30min)", time: "Ontem", correct: null },
-];
-
-const heatmapData = generateHeatmapData(365);
+const upcomingRevisions: any[] = [];
+const recentActivity: any[] = [];
+const heatmapData: any[] = [];
 
 const STATS = [
   {
     label: "Horas Estudadas",
-    value: "127h",
-    sub: "+4.2h hoje",
+    value: "0h",
+    sub: "Nenhuma hoje",
     icon: Clock,
     color: "text-chart-1",
     bg: "bg-chart-1/10",
-    trend: "+12%",
+    trend: "-",
     trendUp: true,
   },
   {
     label: "Questões Respondidas",
-    value: "1.847",
-    sub: "78% de acerto",
+    value: "0",
+    sub: "0% de acerto",
     icon: HelpCircle,
     color: "text-chart-2",
     bg: "bg-chart-2/10",
-    trend: "+8%",
+    trend: "-",
     trendUp: true,
   },
   {
     label: "Simulados Feitos",
-    value: "12",
-    sub: "Média: 71 pts",
+    value: "0",
+    sub: "Média: 0 pts",
     icon: Zap,
     color: "text-chart-3",
     bg: "bg-chart-3/10",
-    trend: "+2",
+    trend: "-",
     trendUp: true,
   },
   {
     label: "Flashcards Revisados",
-    value: "534",
-    sub: "92 pendentes",
+    value: "0",
+    sub: "0 pendentes",
     icon: BookOpen,
     color: "text-chart-5",
     bg: "bg-chart-5/10",
-    trend: "+15%",
+    trend: "-",
     trendUp: true,
   },
 ];
 
+import { useState, useEffect } from "react";
+import { useAuthStore } from "@/store";
+
 export default function DashboardPage() {
+  const { user } = useAuthStore();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   const daysLeft = getDaysUntil(EXAM_DATE);
-  const approvalProbability = calculateApprovalProbability(0.78, 1847, 127, daysLeft);
-  const xpInfo = getXpLevel(4200);
+  const approvalProbability = 0; // Usuário zerado
+  const xpInfo = getXpLevel(0);
 
   const container = {
     hidden: { opacity: 0 },
@@ -137,6 +134,8 @@ export default function DashboardPage() {
     hidden: { opacity: 0, y: 8 },
     show: { opacity: 1, y: 0 },
   };
+
+  if (!mounted) return null;
 
   return (
     <div className="p-6 max-w-[1400px] mx-auto">
@@ -149,7 +148,7 @@ export default function DashboardPage() {
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-xl font-semibold text-foreground">
-              Bom dia, Marcos 👋
+              Bom dia, {user?.name ? user.name.split(" ")[0] : "Estudante"} 👋
             </h1>
             <p className="text-sm text-muted-foreground mt-0.5">
               {new Date().toLocaleDateString("pt-BR", {
@@ -164,9 +163,9 @@ export default function DashboardPage() {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-amber-500/10 border border-amber-500/20">
-              <Flame size={14} className="text-amber-500" />
-              <span className="text-sm font-semibold text-amber-500">7 dias</span>
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-muted border border-border">
+              <Flame size={14} className="text-muted-foreground" />
+              <span className="text-sm font-semibold text-muted-foreground">0 dias</span>
               <span className="text-xs text-muted-foreground">de sequência</span>
             </div>
             <Link href="/simulados">
@@ -394,13 +393,13 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent className="p-4 pt-2 space-y-3">
               {[
-                { name: "Java", progress: 72, color: "#f59e0b" },
-                { name: "Spring", progress: 55, color: "#22c55e" },
-                { name: "Docker/K8s", progress: 48, color: "#0ea5e9" },
-                { name: "Banco de Dados", progress: 65, color: "#84cc16" },
-                { name: "REST / APIs", progress: 80, color: "#06b6d4" },
-                { name: "DevOps", progress: 35, color: "#a855f7" },
-                { name: "Português", progress: 88, color: "#6366f1" },
+                { name: "Java", progress: 0, color: "#f59e0b" },
+                { name: "Spring", progress: 0, color: "#22c55e" },
+                { name: "Docker/K8s", progress: 0, color: "#0ea5e9" },
+                { name: "Banco de Dados", progress: 0, color: "#84cc16" },
+                { name: "REST / APIs", progress: 0, color: "#06b6d4" },
+                { name: "DevOps", progress: 0, color: "#a855f7" },
+                { name: "Português", progress: 0, color: "#6366f1" },
               ].map((subj) => (
                 <div key={subj.name}>
                   <div className="flex items-center justify-between mb-1">
@@ -437,25 +436,33 @@ export default function DashboardPage() {
               </div>
             </CardHeader>
             <CardContent className="p-4 pt-2 space-y-2">
-              {upcomingRevisions.map((rev, i) => (
-                <div
-                  key={i}
-                  className="flex items-center justify-between p-2.5 rounded-md bg-muted/50 hover:bg-muted transition-colors cursor-pointer"
-                >
-                  <div>
-                    <p className="text-xs font-medium text-foreground">{rev.topic}</p>
-                    <p className="text-[10px] text-muted-foreground">{rev.interval}</p>
+              {upcomingRevisions.length > 0 ? (
+                upcomingRevisions.map((rev, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center justify-between p-2.5 rounded-md bg-muted/50 hover:bg-muted transition-colors cursor-pointer"
+                  >
+                    <div>
+                      <p className="text-xs font-medium text-foreground">{rev.topic}</p>
+                      <p className="text-[10px] text-muted-foreground">{rev.interval}</p>
+                    </div>
+                    <Badge variant={i === 0 ? "danger" : "warning"} className="text-[10px]">
+                      {rev.date}
+                    </Badge>
                   </div>
-                  <Badge variant={i === 0 ? "danger" : "warning"} className="text-[10px]">
-                    {rev.date}
-                  </Badge>
+                ))
+              ) : (
+                <div className="flex flex-col items-center justify-center py-6 text-center">
+                  <BookOpen size={24} className="text-muted-foreground/30 mb-2" />
+                  <p className="text-sm text-muted-foreground font-medium">Nenhuma revisão hoje</p>
+                  <p className="text-[10px] text-muted-foreground">Comece a estudar para gerar revisões</p>
                 </div>
-              ))}
+              )}
               <div className="pt-1">
                 <Link href="/flashcards">
                   <Button variant="outline" size="sm" className="w-full text-xs h-8">
                     <BookOpen size={12} />
-                    Revisar Flashcards (92)
+                    Revisar Flashcards (0)
                   </Button>
                 </Link>
               </div>
@@ -489,9 +496,10 @@ export default function DashboardPage() {
               </div>
               <Progress value={xpInfo.progress} className="mb-4" />
 
-              <div className="space-y-2">
+              <div className="space-y-2 mt-4">
                 <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Atividade recente</p>
-                {recentActivity.map((act, i) => (
+                {recentActivity.length > 0 ? (
+                  recentActivity.map((act, i) => (
                   <div key={i} className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <div className="w-5 h-5 rounded-full bg-muted flex items-center justify-center">
@@ -515,7 +523,10 @@ export default function DashboardPage() {
                       </div>
                     )}
                   </div>
-                ))}
+                  ))
+                ) : (
+                  <p className="text-xs text-muted-foreground py-2 text-center">Nenhuma atividade ainda.</p>
+                )}
               </div>
 
               {/* Daily goal */}
@@ -525,10 +536,10 @@ export default function DashboardPage() {
                     <Target size={12} className="text-chart-1" />
                     <span className="text-xs font-medium">Meta diária</span>
                   </div>
-                  <span className="text-xs text-chart-2 font-semibold">4.2 / 4h</span>
+                  <span className="text-xs text-muted-foreground font-semibold">0 / 4h</span>
                 </div>
-                <Progress value={100} indicatorClassName="bg-chart-2" />
-                <p className="text-[10px] text-chart-2 mt-1">✓ Meta concluída!</p>
+                <Progress value={0} indicatorClassName="bg-chart-2" />
+                <p className="text-[10px] text-muted-foreground mt-1">Comece a estudar para bater a meta!</p>
               </div>
             </CardContent>
           </Card>

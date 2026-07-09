@@ -48,6 +48,8 @@ export async function POST(request: NextRequest) {
         avatar: user.avatar,
         examDate: user.examDate,
         dailyGoalHours: user.dailyGoalHours,
+        role: user.role,
+        totalXp: user.totalXp,
       },
       token,
     });

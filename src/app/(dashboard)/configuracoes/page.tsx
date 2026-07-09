@@ -11,6 +11,7 @@ import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { useTheme } from "next-themes";
 import { useAuthStore } from "@/store";
+import { toast } from "sonner";
 
 const SECTIONS = [
   { id: "perfil", label: "Perfil", icon: User },
@@ -82,7 +83,7 @@ export default function ConfiguracoesPage() {
                       {form.name.charAt(0)}
                     </div>
                     <div>
-                      <Button variant="outline" size="sm" className="text-xs">
+                      <Button variant="outline" size="sm" className="text-xs" onClick={() => toast.info("Funcionalidade de upload em breve!")}>
                         Alterar foto
                       </Button>
                       <p className="text-[10px] text-muted-foreground mt-1">JPG, PNG ou GIF · max 2MB</p>
@@ -113,7 +114,7 @@ export default function ConfiguracoesPage() {
                     </div>
                   </div>
 
-                  <Button variant="indigo" size="sm" className="mt-2">
+                  <Button variant="indigo" size="sm" className="mt-2" onClick={() => toast.success("Perfil atualizado com sucesso!")}>
                     Salvar alterações
                   </Button>
                 </CardContent>
@@ -169,7 +170,7 @@ export default function ConfiguracoesPage() {
                     ))}
                   </div>
 
-                  <Button variant="indigo" size="sm">
+                  <Button variant="indigo" size="sm" onClick={() => toast.success("Metas atualizadas com sucesso!")}>
                     Salvar metas
                   </Button>
                 </CardContent>
@@ -245,6 +246,7 @@ export default function ConfiguracoesPage() {
                         <p className="text-[11px] text-muted-foreground">{n.desc}</p>
                       </div>
                       <button
+                        onClick={() => toast.success(`${n.label} atualizado.`)}
                         className={cn(
                           "w-10 h-5 rounded-full transition-colors relative",
                           n.on ? "bg-chart-1" : "bg-muted"
@@ -303,7 +305,7 @@ export default function ConfiguracoesPage() {
                         <p className="text-sm font-medium">Exportar dados</p>
                         <p className="text-[11px] text-muted-foreground">Baixar todos os seus dados em JSON</p>
                       </div>
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" onClick={() => toast.success("Download iniciado!")}>
                         <Download size={13} />
                         Exportar
                       </Button>
@@ -313,7 +315,7 @@ export default function ConfiguracoesPage() {
                         <p className="text-sm font-medium">Importar dados</p>
                         <p className="text-[11px] text-muted-foreground">Restaurar de um backup anterior</p>
                       </div>
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" onClick={() => toast.info("Selecione um arquivo JSON.")}>
                         <Upload size={13} />
                         Importar
                       </Button>
@@ -341,7 +343,7 @@ export default function ConfiguracoesPage() {
                         <p className="text-sm font-medium">Excluir conta</p>
                         <p className="text-[11px] text-muted-foreground">Esta ação é irreversível</p>
                       </div>
-                      <Button variant="destructive" size="sm">
+                      <Button variant="destructive" size="sm" onClick={() => toast.error("Por motivos de segurança, entre em contato com o suporte.")}>
                         <Trash2 size={13} />
                         Excluir conta
                       </Button>

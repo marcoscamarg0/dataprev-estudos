@@ -27,7 +27,7 @@ const ACHIEVEMENTS = [
     description: "Complete sua primeira sessão de estudo",
     icon: "🚀",
     xp: 50,
-    unlocked: true,
+    unlocked: false,
     unlockedAt: "01/06/2026",
   },
   {
@@ -36,7 +36,7 @@ const ACHIEVEMENTS = [
     description: "Mantenha um streak de 7 dias consecutivos",
     icon: "🔥",
     xp: 200,
-    unlocked: true,
+    unlocked: false,
     unlockedAt: "07/06/2026",
   },
   {
@@ -45,7 +45,7 @@ const ACHIEVEMENTS = [
     description: "Responda 100 questões",
     icon: "💯",
     xp: 150,
-    unlocked: true,
+    unlocked: false,
     unlockedAt: "10/06/2026",
   },
   {
@@ -54,7 +54,7 @@ const ACHIEVEMENTS = [
     description: "Complete seu primeiro simulado",
     icon: "📋",
     xp: 100,
-    unlocked: true,
+    unlocked: false,
     unlockedAt: "15/06/2026",
   },
   {
@@ -64,7 +64,7 @@ const ACHIEVEMENTS = [
     icon: "🃏",
     xp: 100,
     unlocked: false,
-    progress: 34,
+    progress: 0,
     target: 50,
   },
   {
@@ -74,7 +74,7 @@ const ACHIEVEMENTS = [
     icon: "💪",
     xp: 500,
     unlocked: false,
-    progress: 7,
+    progress: 0,
     target: 30,
   },
   {
@@ -84,7 +84,7 @@ const ACHIEVEMENTS = [
     icon: "🎯",
     xp: 1000,
     unlocked: false,
-    progress: 847,
+    progress: 0,
     target: 1000,
   },
   {
@@ -94,7 +94,7 @@ const ACHIEVEMENTS = [
     icon: "🎯",
     xp: 300,
     unlocked: false,
-    progress: 74,
+    progress: 0,
     target: 80,
   },
   {
@@ -104,7 +104,7 @@ const ACHIEVEMENTS = [
     icon: "👑",
     xp: 2000,
     unlocked: false,
-    progress: 12,
+    progress: 0,
     target: 100,
   },
   {
@@ -113,7 +113,7 @@ const ACHIEVEMENTS = [
     description: "Acumule 100 horas de estudo",
     icon: "⏱️",
     xp: 800,
-    unlocked: true,
+    unlocked: false,
     unlockedAt: "05/07/2026",
   },
   {
@@ -123,7 +123,7 @@ const ACHIEVEMENTS = [
     icon: "🍅",
     xp: 250,
     unlocked: false,
-    progress: 32,
+    progress: 0,
     target: 50,
   },
   {
@@ -141,7 +141,7 @@ const WEEKLY_MISSIONS = [
     id: "m1",
     title: "Resolver 100 questões",
     icon: HelpCircle,
-    progress: 73,
+    progress: 0,
     target: 100,
     xp: 150,
     deadline: "Domingo",
@@ -150,7 +150,7 @@ const WEEKLY_MISSIONS = [
     id: "m2",
     title: "Estudar 20 horas",
     icon: Clock,
-    progress: 14.5,
+    progress: 0,
     target: 20,
     xp: 200,
     deadline: "Domingo",
@@ -159,11 +159,11 @@ const WEEKLY_MISSIONS = [
     id: "m3",
     title: "Revisar 50 flashcards",
     icon: BookOpen,
-    progress: 50,
+    progress: 0,
     target: 50,
     xp: 100,
     deadline: "Domingo",
-    completed: true,
+    completed: false,
   },
   {
     id: "m4",
@@ -178,7 +178,7 @@ const WEEKLY_MISSIONS = [
 
 export default function ConquistasPage() {
   const [filter, setFilter] = useState<"all" | "unlocked" | "locked">("all");
-  const xpInfo = getXpLevel(4200);
+  const xpInfo = getXpLevel(0);
   const unlockedCount = ACHIEVEMENTS.filter((a) => a.unlocked).length;
 
   const filtered = ACHIEVEMENTS.filter((a) => {
@@ -237,7 +237,7 @@ export default function ConquistasPage() {
                   <Flame size={18} className="text-amber-500" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-foreground">7 dias</p>
+                  <p className="text-2xl font-bold text-foreground">0 dias</p>
                   <p className="text-xs text-muted-foreground">Sequência atual</p>
                 </div>
               </div>
@@ -247,7 +247,7 @@ export default function ConquistasPage() {
                     key={i}
                     className={cn(
                       "flex-1 h-6 rounded flex items-center justify-center text-[10px]",
-                      i < 7 ? "bg-amber-500/20 text-amber-500" : "bg-muted text-muted-foreground"
+                      "bg-muted text-muted-foreground"
                     )}
                   >
                     {["S", "T", "Q", "Q", "S", "S", "D"][i]}

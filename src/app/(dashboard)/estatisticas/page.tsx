@@ -27,39 +27,39 @@ import { cn, calculateApprovalProbability, getDaysUntil, EXAM_DATE } from "@/lib
 import { TrendingUp, TrendingDown, Target, Brain, Clock, HelpCircle } from "lucide-react";
 
 const radarData = [
-  { subject: "Java", value: 72, fullMark: 100 },
-  { subject: "Spring", value: 55, fullMark: 100 },
-  { subject: "REST", value: 80, fullMark: 100 },
-  { subject: "Docker", value: 48, fullMark: 100 },
-  { subject: "BD", value: 65, fullMark: 100 },
-  { subject: "Redes", value: 40, fullMark: 100 },
-  { subject: "DevOps", value: 35, fullMark: 100 },
-  { subject: "Testes", value: 60, fullMark: 100 },
-  { subject: "Português", value: 88, fullMark: 100 },
-  { subject: "Lógica", value: 70, fullMark: 100 },
+  { subject: "Java", value: 0, fullMark: 100 },
+  { subject: "Spring", value: 0, fullMark: 100 },
+  { subject: "REST", value: 0, fullMark: 100 },
+  { subject: "Docker", value: 0, fullMark: 100 },
+  { subject: "BD", value: 0, fullMark: 100 },
+  { subject: "Redes", value: 0, fullMark: 100 },
+  { subject: "DevOps", value: 0, fullMark: 100 },
+  { subject: "Testes", value: 0, fullMark: 100 },
+  { subject: "Português", value: 0, fullMark: 100 },
+  { subject: "Lógica", value: 0, fullMark: 100 },
 ];
 
 const monthlyData = Array.from({ length: 30 }, (_, i) => ({
   day: i + 1,
-  acertos: 50 + Math.random() * 30 + i * 0.8,
-  questoes: 20 + Math.floor(Math.random() * 40),
+  acertos: 0,
+  questoes: 0,
 }));
 
 const pieData = [
-  { name: "Corretas", value: 1440, color: "hsl(142, 76%, 36%)" },
-  { name: "Erradas", value: 380, color: "hsl(0, 84%, 60%)" },
-  { name: "Em branco", value: 27, color: "hsl(0, 0%, 45%)" },
+  { name: "Corretas", value: 0, color: "hsl(142, 76%, 36%)" },
+  { name: "Erradas", value: 0, color: "hsl(0, 84%, 60%)" },
+  { name: "Em branco", value: 0, color: "hsl(0, 0%, 45%)" },
 ];
 
 const subjectBarData = [
-  { name: "Java", acerto: 72, questoes: 420 },
-  { name: "Spring", acerto: 55, questoes: 280 },
-  { name: "Docker", acerto: 48, questoes: 180 },
-  { name: "BD", acerto: 65, questoes: 320 },
-  { name: "REST", acerto: 80, questoes: 240 },
-  { name: "Redes", acerto: 40, questoes: 120 },
-  { name: "DevOps", acerto: 35, questoes: 90 },
-  { name: "Testes", acerto: 60, questoes: 150 },
+  { name: "Java", acerto: 0, questoes: 0 },
+  { name: "Spring", acerto: 0, questoes: 0 },
+  { name: "Docker", acerto: 0, questoes: 0 },
+  { name: "BD", acerto: 0, questoes: 0 },
+  { name: "REST", acerto: 0, questoes: 0 },
+  { name: "Redes", acerto: 0, questoes: 0 },
+  { name: "DevOps", acerto: 0, questoes: 0 },
+  { name: "Testes", acerto: 0, questoes: 0 },
 ];
 
 const WEAK_SUBJECTS = subjectBarData
@@ -93,10 +93,10 @@ export default function EstatisticasPage() {
       >
         {/* Overview stats */}
         {[
-          { label: "Taxa de Acerto", value: "78%", delta: "+2.3%", up: true, icon: Target },
-          { label: "Questões Respondidas", value: "1.847", delta: "+120 esta semana", up: true, icon: HelpCircle },
-          { label: "Horas Estudadas", value: "127h", delta: "+4.2h hoje", up: true, icon: Clock },
-          { label: "Prob. Aprovação", value: `${approvalProb}%`, delta: "em alta", up: true, icon: Brain },
+          { label: "Taxa de Acerto", value: "0%", delta: "0%", up: true, icon: Target },
+          { label: "Questões Respondidas", value: "0", delta: "0 esta semana", up: true, icon: HelpCircle },
+          { label: "Horas Estudadas", value: "0h", delta: "0h hoje", up: true, icon: Clock },
+          { label: "Prob. Aprovação", value: `0%`, delta: "iniciando", up: true, icon: Brain },
         ].map((s) => (
           <motion.div key={s.label} variants={item} className="col-span-3">
             <Card>
@@ -222,11 +222,18 @@ export default function EstatisticasPage() {
                   </p>
                 </div>
               ))}
-              <div className="pt-2 border-t border-border">
-                <p className="text-[11px] text-muted-foreground">
-                  💡 <strong>Recomendação:</strong> Dedique 60% do tempo das próximas 2 semanas a DevOps, Redes e Docker para equilibrar seu desempenho.
-                </p>
-              </div>
+              {WEAK_SUBJECTS.length === 0 && (
+                <div className="py-4 text-center text-muted-foreground">
+                  <p className="text-sm">Nenhum dado suficiente ainda.</p>
+                </div>
+              )}
+              {WEAK_SUBJECTS.length > 0 && (
+                <div className="pt-2 border-t border-border">
+                  <p className="text-[11px] text-muted-foreground">
+                    💡 <strong>Recomendação:</strong> Estude mais para gerar recomendações.
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </motion.div>
@@ -348,9 +355,9 @@ export default function EstatisticasPage() {
             <CardContent className="p-4">
               <div className="grid grid-cols-3 gap-4">
                 {[
-                  { label: "Questões projetadas", value: "5.200+", sub: "até o dia da prova", color: "text-chart-1" },
-                  { label: "Taxa de acerto projetada", value: "85%", sub: "se mantiver ritmo atual", color: "text-chart-2" },
-                  { label: "Horas restantes", value: "~320h", sub: `em ${daysLeft} dias`, color: "text-chart-5" },
+                  { label: "Questões projetadas", value: "0", sub: "até o dia da prova", color: "text-chart-1" },
+                  { label: "Taxa de acerto projetada", value: "0%", sub: "se mantiver ritmo atual", color: "text-chart-2" },
+                  { label: "Horas restantes", value: "0h", sub: `em ${daysLeft} dias`, color: "text-chart-5" },
                 ].map((p) => (
                   <div key={p.label} className="p-3 rounded-lg bg-muted/30 text-center">
                     <p className={cn("text-2xl font-bold", p.color)}>{p.value}</p>
@@ -361,8 +368,7 @@ export default function EstatisticasPage() {
               </div>
               <div className="mt-4 p-3 rounded-lg bg-chart-2/10 border border-chart-2/20">
                 <p className="text-xs text-chart-2 font-medium">
-                  🎯 Previsão: Com o ritmo atual, você tem <strong>{approvalProb}% de chance de aprovação</strong>.
-                  Para chegar a 90%, aumente a taxa de acerto em questões de DevOps e Redes.
+                  🎯 Previsão: Faça exercícios e simulados para que o sistema possa projetar sua chance de aprovação.
                 </p>
               </div>
             </CardContent>

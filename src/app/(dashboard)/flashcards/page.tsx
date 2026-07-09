@@ -40,69 +40,7 @@ interface Flashcard {
   isNew?: boolean;
 }
 
-const MOCK_FLASHCARDS: Flashcard[] = [
-  {
-    id: "fc1",
-    front: "O que é Injeção de Dependência (DI) no Spring?",
-    back: "É um padrão onde o container Spring cria e gerencia objetos (beans) e injeta suas dependências automaticamente, via construtor, setter ou campo (@Autowired). Promove baixo acoplamento e facilita testes.",
-    tags: ["spring", "di", "ioc"],
-    topicId: "spring-core",
-    topicName: "Spring Core / IoC",
-    interval: 7,
-    repetitions: 2,
-    easeFactor: 2.5,
-    nextReview: new Date(Date.now() + 86400000),
-  },
-  {
-    id: "fc2",
-    front: "Qual a diferença entre ArrayList e LinkedList em Java?",
-    back: "ArrayList: array dinâmico, acesso O(1) por índice, inserção/remoção O(n).\nLinkedList: lista duplamente encadeada, acesso O(n), inserção/remoção O(1) nas extremidades. Use ArrayList para leitura frequente, LinkedList para inserções/remoções no início/meio.",
-    tags: ["java", "collections"],
-    topicId: "java-fundamentos",
-    topicName: "Fundamentos de Java",
-    interval: 1,
-    repetitions: 0,
-    easeFactor: 2.5,
-    nextReview: new Date(),
-    isNew: true,
-  },
-  {
-    id: "fc3",
-    front: "O que é o algoritmo SM-2 (SuperMemo)?",
-    back: "Algoritmo de repetição espaçada que calcula o intervalo entre revisões baseado na qualidade da resposta (0-5). Intervalo inicial: 1 dia → 6 dias → i * EF (fator de facilidade). EF ajustado pela qualidade: EF' = EF + (0.1 - (5-q) * (0.08 + (5-q) * 0.02)).",
-    tags: ["anki", "spaced-repetition"],
-    topicId: undefined,
-    topicName: "Geral",
-    interval: 30,
-    repetitions: 4,
-    easeFactor: 2.8,
-    nextReview: new Date(Date.now() + 30 * 86400000),
-  },
-  {
-    id: "fc4",
-    front: "Quais são os estados de um container Docker?",
-    back: "Created → Running → Paused → Stopped → Exited\n\nComandos:\n• docker start/stop/pause/unpause/kill\n• docker rm (remove container parado)\n• docker inspect (ver detalhes)\n• docker logs (ver saída)",
-    tags: ["docker", "containers"],
-    topicId: "docker-core",
-    topicName: "Docker",
-    interval: 15,
-    repetitions: 3,
-    easeFactor: 2.6,
-    nextReview: new Date(Date.now() + 5 * 86400000),
-  },
-  {
-    id: "fc5",
-    front: "O que é ACID em banco de dados?",
-    back: "A - Atomicidade: transação é tudo ou nada\nC - Consistência: dados sempre em estado válido\nI - Isolamento: transações concorrentes não interferem\nD - Durabilidade: dados persistem mesmo após falha\n\nGarantido por SGBDs relacionais como PostgreSQL e MySQL.",
-    tags: ["banco-dados", "transações"],
-    topicId: "bd-relacional",
-    topicName: "Banco de Dados Relacional",
-    interval: 7,
-    repetitions: 2,
-    easeFactor: 2.5,
-    nextReview: new Date(Date.now() + 2 * 86400000),
-  },
-];
+const MOCK_FLASHCARDS: Flashcard[] = [];
 
 type ViewMode = "deck" | "study" | "create";
 
@@ -402,6 +340,12 @@ export default function FlashcardsPage() {
 
       {/* Cards grid */}
       <div className="grid grid-cols-2 gap-3">
+        {filteredCards.length === 0 && (
+          <div className="col-span-2 text-center py-12 text-muted-foreground">
+            <BookOpen size={32} className="mx-auto mb-4 opacity-50" />
+            <p className="text-sm">Nenhum flashcard disponível ainda.</p>
+          </div>
+        )}
         {filteredCards.map((card) => {
           const isDue = new Date(card.nextReview) <= new Date();
           return (

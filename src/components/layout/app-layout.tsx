@@ -33,6 +33,7 @@ import {
   Trophy,
   RefreshCw,
   PenSquare,
+  Shield,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 
@@ -69,6 +70,7 @@ const NAV_ITEMS = [
       { href: "/estatisticas", icon: BarChart3, label: "Estatísticas" },
       { href: "/metas", icon: Target, label: "Metas" },
       { href: "/conquistas", icon: Trophy, label: "Conquistas" },
+      { href: "/ranking", icon: Flame, label: "Ranking Global" },
     ],
   },
 ];
@@ -84,7 +86,10 @@ export function AppLayout({ children }: AppLayoutProps) {
   const { user, logout } = useAuthStore();
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const daysLeft = getDaysUntil(EXAM_DATE);
+  
+  const isEffectivelyCollapsed = sidebarCollapsed && !isHovered;
 
   useEffect(() => setMounted(true), []);
 
@@ -92,9 +97,11 @@ export function AppLayout({ children }: AppLayoutProps) {
     <div className="flex h-screen bg-background overflow-hidden">
       {/* Sidebar */}
       <motion.aside
-        animate={{ width: sidebarCollapsed ? 56 : 232 }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        animate={{ width: isEffectivelyCollapsed ? 56 : 280 }}
         transition={{ duration: 0.2, ease: "easeInOut" }}
-        className="relative flex flex-col border-r border-border bg-sidebar shrink-0 overflow-hidden"
+        className="relative flex flex-col border-r border-border bg-sidebar shrink-0 overflow-hidden z-20"
       >
         {/* Logo */}
         <div className="flex items-center h-14 px-3 border-b border-sidebar-border shrink-0">
@@ -103,7 +110,7 @@ export function AppLayout({ children }: AppLayoutProps) {
               <span className="text-white text-xs font-bold">D</span>
             </div>
             <AnimatePresence>
-              {!sidebarCollapsed && (
+              {!isEffectivelyCollapsed && (
                 <motion.div
                   initial={{ opacity: 0, x: -8 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -128,7 +135,7 @@ export function AppLayout({ children }: AppLayoutProps) {
           {NAV_ITEMS.map((section) => (
             <div key={section.section} className="mb-4">
               <AnimatePresence>
-                {!sidebarCollapsed && (
+                {!isEffectivelyCollapsed && (
                   <motion.p
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -150,16 +157,16 @@ export function AppLayout({ children }: AppLayoutProps) {
                         className={cn(
                           "sidebar-item",
                           active && "active",
-                          sidebarCollapsed && "justify-center px-0"
+                          isEffectivelyCollapsed && "justify-center px-0"
                         )}
-                        title={sidebarCollapsed ? item.label : undefined}
+                        title={isEffectivelyCollapsed ? item.label : undefined}
                       >
                         <item.icon
-                          size={15}
+                          size={18}
                           className={active ? "text-foreground" : ""}
                         />
                         <AnimatePresence>
-                          {!sidebarCollapsed && (
+                          {!isEffectivelyCollapsed && (
                             <motion.span
                               initial={{ opacity: 0 }}
                               animate={{ opacity: 1 }}
@@ -182,7 +189,7 @@ export function AppLayout({ children }: AppLayoutProps) {
 
         {/* Exam countdown */}
         <AnimatePresence>
-          {!sidebarCollapsed && (
+          {!isEffectivelyCollapsed && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -200,19 +207,48 @@ export function AppLayout({ children }: AppLayoutProps) {
           )}
         </AnimatePresence>
 
+        {/* Admin Link (Conditional) */}
+        {user?.role === "ADMIN" && (
+          <div className="px-1.5 mb-2 mt-2">
+            <Link href="/admin">
+              <div
+                className={cn(
+                  "sidebar-item text-amber-500 hover:text-amber-400 hover:bg-amber-500/10",
+                  isEffectivelyCollapsed && "justify-center px-0"
+                )}
+                title={isEffectivelyCollapsed ? "Painel Admin" : undefined}
+              >
+                <Shield size={18} />
+                <AnimatePresence>
+                  {!isEffectivelyCollapsed && (
+                    <motion.span
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="truncate text-sm font-medium"
+                    >
+                      Painel Admin
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </div>
+            </Link>
+          </div>
+        )}
+
         {/* Bottom: Settings & Collapse */}
         <div className="border-t border-sidebar-border p-2 space-y-0.5">
           <Link href="/configuracoes">
             <div
               className={cn(
                 "sidebar-item",
-                sidebarCollapsed && "justify-center px-0"
+                isEffectivelyCollapsed && "justify-center px-0"
               )}
-              title={sidebarCollapsed ? "Configurações" : undefined}
+              title={isEffectivelyCollapsed ? "Configurações" : undefined}
             >
-              <Settings size={15} />
+              <Settings size={18} />
               <AnimatePresence>
-                {!sidebarCollapsed && (
+                {!isEffectivelyCollapsed && (
                   <motion.span
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -229,14 +265,14 @@ export function AppLayout({ children }: AppLayoutProps) {
             onClick={toggleSidebar}
             className={cn(
               "sidebar-item w-full",
-              sidebarCollapsed && "justify-center px-0"
+              isEffectivelyCollapsed && "justify-center px-0"
             )}
           >
-            {sidebarCollapsed ? (
-              <ChevronRight size={15} />
+            {isEffectivelyCollapsed ? (
+              <ChevronRight size={18} />
             ) : (
               <>
-                <ChevronLeft size={15} />
+                <ChevronLeft size={18} />
                 <motion.span
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -292,7 +328,7 @@ export function AppLayout({ children }: AppLayoutProps) {
             </Button>
 
             {/* User avatar */}
-            <Link href="/perfil">
+            <Link href="/configuracoes">
               <div className="w-7 h-7 rounded-full bg-chart-1 flex items-center justify-center cursor-pointer hover:ring-2 hover:ring-chart-1/50 transition-all ml-1">
                 {user?.avatar ? (
                   <img

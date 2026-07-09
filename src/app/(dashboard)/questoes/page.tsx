@@ -29,110 +29,7 @@ import { cn } from "@/lib/utils";
 import { DATAPREV_CURRICULUM } from "@/lib/curriculum";
 
 // Mock question bank
-const MOCK_QUESTIONS = [
-  {
-    id: "q1",
-    statement: "Em Java, qual é a diferença entre `==` e `.equals()` ao comparar Strings?",
-    alternatives: [
-      { letter: "A", text: "`==` compara valores e `.equals()` compara referências de memória", isCorrect: false },
-      { letter: "B", text: "`==` compara referências de memória e `.equals()` compara o conteúdo das Strings", isCorrect: true },
-      { letter: "C", text: "Ambos comparam o conteúdo das Strings, mas `.equals()` é mais eficiente", isCorrect: false },
-      { letter: "D", text: "Não há diferença prática ao comparar Strings em Java", isCorrect: false },
-      { letter: "E", text: "`==` só funciona com tipos primitivos e `.equals()` com objetos", isCorrect: false },
-    ],
-    explanation: "Em Java, `==` compara referências de memória (endereços dos objetos), não o conteúdo. Portanto, duas Strings com o mesmo valor podem retornar `false` com `==`. Já `.equals()` compara o conteúdo da String caractere por caractere. Exceção: Strings literais podem ser iguais com `==` por causa do String Pool.",
-    topicId: "java-fundamentos",
-    banca: "FGV",
-    year: 2023,
-    difficulty: "easy",
-    tags: ["java", "strings", "orientação-a-objetos"],
-  },
-  {
-    id: "q2",
-    statement: "Qual anotação do Spring Boot é utilizada para indicar que uma classe é um componente gerenciado pelo container IoC, especializado para a camada de serviço?",
-    alternatives: [
-      { letter: "A", text: "@Component", isCorrect: false },
-      { letter: "B", text: "@Repository", isCorrect: false },
-      { letter: "C", text: "@Service", isCorrect: true },
-      { letter: "D", text: "@Controller", isCorrect: false },
-      { letter: "E", text: "@Bean", isCorrect: false },
-    ],
-    explanation: "@Service é uma especialização de @Component que indica que a classe pertence à camada de serviço (lógica de negócios). @Repository é para a camada de persistência, @Controller para a camada web, e @Component é o genérico. Todas são detectadas pelo component scanning.",
-    topicId: "spring-core",
-    banca: "FGV",
-    year: 2023,
-    difficulty: "easy",
-    tags: ["spring", "anotações", "ioc"],
-  },
-  {
-    id: "q3",
-    statement: "No contexto de REST APIs, qual é o código HTTP correto para indicar que um recurso foi criado com sucesso?",
-    alternatives: [
-      { letter: "A", text: "200 OK", isCorrect: false },
-      { letter: "B", text: "201 Created", isCorrect: true },
-      { letter: "C", text: "204 No Content", isCorrect: false },
-      { letter: "D", text: "202 Accepted", isCorrect: false },
-      { letter: "E", text: "200 OK com body vazio", isCorrect: false },
-    ],
-    explanation: "HTTP 201 Created é o status code correto para indicar que uma requisição POST resultou na criação de um novo recurso. A resposta deve incluir o header Location apontando para o novo recurso. 200 OK é para requisições bem-sucedidas genéricas, 204 No Content para quando não há corpo de resposta, e 202 Accepted para operações assíncronas.",
-    topicId: "rest-principios",
-    banca: "FGV",
-    year: 2024,
-    difficulty: "easy",
-    tags: ["rest", "http", "api"],
-  },
-  {
-    id: "q4",
-    statement: "Em Docker, qual comando é utilizado para listar todos os containers em execução, incluindo os que estão parados?",
-    alternatives: [
-      { letter: "A", text: "docker ps", isCorrect: false },
-      { letter: "B", text: "docker list all", isCorrect: false },
-      { letter: "C", text: "docker ps -a", isCorrect: true },
-      { letter: "D", text: "docker containers", isCorrect: false },
-      { letter: "E", text: "docker show -all", isCorrect: false },
-    ],
-    explanation: "`docker ps` lista apenas containers em execução. A flag `-a` (ou `--all`) inclui todos os containers, independente do estado (running, stopped, created, exited). É um dos comandos mais usados para gerenciar containers Docker.",
-    topicId: "docker-core",
-    banca: "FGV",
-    year: 2024,
-    difficulty: "easy",
-    tags: ["docker", "containers", "comandos"],
-  },
-  {
-    id: "q5",
-    statement: "Qual princípio SOLID estabelece que classes devem estar abertas para extensão, mas fechadas para modificação?",
-    alternatives: [
-      { letter: "A", text: "Single Responsibility Principle (SRP)", isCorrect: false },
-      { letter: "B", text: "Liskov Substitution Principle (LSP)", isCorrect: false },
-      { letter: "C", text: "Open/Closed Principle (OCP)", isCorrect: true },
-      { letter: "D", text: "Interface Segregation Principle (ISP)", isCorrect: false },
-      { letter: "E", text: "Dependency Inversion Principle (DIP)", isCorrect: false },
-    ],
-    explanation: "O Open/Closed Principle (OCP), segundo princípio do SOLID, afirma que entidades de software devem estar abertas para extensão (novos comportamentos podem ser adicionados) mas fechadas para modificação (código existente não deve ser alterado). Isso é geralmente alcançado através de herança, interfaces e design patterns como Strategy e Template Method.",
-    topicId: "clean-code-core",
-    banca: "FGV",
-    year: 2023,
-    difficulty: "medium",
-    tags: ["solid", "clean-code", "design"],
-  },
-  {
-    id: "q6",
-    statement: "Na arquitetura de microserviços, o padrão Circuit Breaker tem como objetivo principal:",
-    alternatives: [
-      { letter: "A", text: "Criptografar a comunicação entre serviços", isCorrect: false },
-      { letter: "B", text: "Balancear a carga entre instâncias de um serviço", isCorrect: false },
-      { letter: "C", text: "Prevenir falhas em cascata ao isolar serviços com problemas", isCorrect: true },
-      { letter: "D", text: "Gerenciar a descoberta automática de serviços na rede", isCorrect: false },
-      { letter: "E", text: "Serializar e desserializar dados entre serviços", isCorrect: false },
-    ],
-    explanation: "O Circuit Breaker (Disjuntor) é um padrão de resiliência que monitora chamadas a serviços externos. Quando detecta falhas repetidas, 'abre o circuito' e retorna erros imediatamente sem tentar a chamada real, evitando sobrecarga e falhas em cascata. Após um timeout, tenta novamente ('half-open'). É implementado em Java via Resilience4j ou Hystrix.",
-    topicId: "micro-arquitetura",
-    banca: "FGV",
-    year: 2024,
-    difficulty: "medium",
-    tags: ["microserviços", "circuit-breaker", "resiliência"],
-  },
-];
+const MOCK_QUESTIONS: any[] = [];
 
 type FilterState = {
   subject: string;
@@ -468,6 +365,12 @@ export default function QuestoesPage() {
 
       {/* Question list */}
       <div className="space-y-2">
+        {filteredQuestions.length === 0 && (
+          <div className="text-center py-12 text-muted-foreground">
+            <HelpCircle size={32} className="mx-auto mb-4 opacity-50" />
+            <p className="text-sm">Nenhuma questão disponível ainda.</p>
+          </div>
+        )}
         {filteredQuestions.map((q, idx) => {
           const answered = answers[q.id];
           const isCorrect =
