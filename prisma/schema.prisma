@@ -1,0 +1,346 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id              String   @id @default(cuid())
+  email           String   @unique
+  name            String
+  password        String?
+  googleId        String?  @unique
+  avatar          String?
+  examDate        DateTime?
+  dailyGoalHours  Float    @default(4)
+  weeklyGoalHours Float    @default(20)
+  theme           String   @default("dark")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  studySessions   StudySession[]
+  questionAttempts QuestionAttempt[]
+  examAttempts    ExamAttempt[]
+  flashcardReviews FlashcardReview[]
+  notes           Note[]
+  flashcards      Flashcard[]
+  goals           Goal[]
+  achievements    UserAchievement[]
+  revisions       Revision[]
+  libraryItems    LibraryItem[]
+  topicProgress   TopicProgress[]
+  notifications   Notification[]
+  xpHistory       XpHistory[]
+
+  @@map("users")
+}
+
+model Subject {
+  id          String  @id @default(cuid())
+  name        String
+  slug        String  @unique
+  category    String  // "general" | "specific"
+  color       String  @default("#4f46e5")
+  weight      Float   @default(1.0)
+  order       Int     @default(0)
+  
+  topics      Topic[]
+
+  @@map("subjects")
+}
+
+model Topic {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String
+  subjectId   String
+  order       Int      @default(0)
+  
+  subject     Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  subtopics   Subtopic[]
+  questions   Question[]
+  flashcards  Flashcard[]
+  notes       Note[]
+  revisions   Revision[]
+  topicProgress TopicProgress[]
+
+  @@map("topics")
+}
+
+model Subtopic {
+  id          String   @id @default(cuid())
+  name        String
+  topicId     String
+  order       Int      @default(0)
+  
+  topic       Topic    @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  questions   Question[]
+
+  @@map("subtopics")
+}
+
+model TopicProgress {
+  id            String   @id @default(cuid())
+  userId        String
+  topicId       String
+  status        String   @default("not_started") // not_started | studying | review | mastered
+  progress      Float    @default(0)
+  timeStudied   Int      @default(0) // in minutes
+  notes         String?  @db.Text
+  domainLevel   Int      @default(0) // 0-5
+  updatedAt     DateTime @updatedAt
+  
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topic Topic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, topicId])
+  @@map("topic_progress")
+}
+
+model Question {
+  id          String   @id @default(cuid())
+  statement   String   @db.Text
+  alternatives Json    // [{letter: "A", text: "...", isCorrect: boolean}]
+  explanation String?  @db.Text
+  topicId     String?
+  subtopicId  String?
+  banca       String?  @default("FGV")
+  year        Int?
+  difficulty  String   @default("medium") // easy | medium | hard
+  tags        String[]
+  createdAt   DateTime @default(now())
+
+  topic       Topic?    @relation(fields: [topicId], references: [id])
+  subtopic    Subtopic? @relation(fields: [subtopicId], references: [id])
+  attempts    QuestionAttempt[]
+  examQuestions ExamQuestion[]
+
+  @@map("questions")
+}
+
+model QuestionAttempt {
+  id           String   @id @default(cuid())
+  userId       String
+  questionId   String
+  answer       String
+  isCorrect    Boolean
+  timeSpent    Int      // seconds
+  isFavorited  Boolean  @default(false)
+  isDoubt      Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@map("question_attempts")
+}
+
+model Exam {
+  id          String   @id @default(cuid())
+  title       String
+  type        String   // full | quick | custom | adaptive
+  duration    Int      // minutes
+  isPublic    Boolean  @default(false)
+  config      Json?    // filters used to generate
+  createdAt   DateTime @default(now())
+
+  questions   ExamQuestion[]
+  attempts    ExamAttempt[]
+
+  @@map("exams")
+}
+
+model ExamQuestion {
+  id         String @id @default(cuid())
+  examId     String
+  questionId String
+  order      Int
+
+  exam     Exam     @relation(fields: [examId], references: [id], onDelete: Cascade)
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@map("exam_questions")
+}
+
+model ExamAttempt {
+  id          String    @id @default(cuid())
+  userId      String
+  examId      String
+  answers     Json      // {questionId: answer}
+  score       Float?
+  totalTime   Int?      // seconds
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exam Exam @relation(fields: [examId], references: [id], onDelete: Cascade)
+
+  @@map("exam_attempts")
+}
+
+model Flashcard {
+  id          String   @id @default(cuid())
+  userId      String
+  topicId     String?
+  front       String   @db.Text
+  back        String   @db.Text
+  tags        String[]
+  createdAt   DateTime @default(now())
+
+  user    User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topic   Topic?           @relation(fields: [topicId], references: [id])
+  reviews FlashcardReview[]
+
+  @@map("flashcards")
+}
+
+model FlashcardReview {
+  id          String   @id @default(cuid())
+  userId      String
+  flashcardId String
+  rating      Int      // 1-5 (SM-2 quality)
+  easeFactor  Float    @default(2.5)
+  interval    Int      @default(1) // days
+  repetitions Int      @default(0)
+  nextReview  DateTime
+  createdAt   DateTime @default(now())
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  flashcard Flashcard @relation(fields: [flashcardId], references: [id], onDelete: Cascade)
+
+  @@map("flashcard_reviews")
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  userId    String
+  topicId   String?
+  title     String
+  content   Json     // TipTap JSON content
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topic Topic? @relation(fields: [topicId], references: [id])
+
+  @@map("notes")
+}
+
+model StudySession {
+  id        String    @id @default(cuid())
+  userId    String
+  topicId   String?
+  type      String    @default("free") // pomodoro | free
+  duration  Int       // minutes
+  startedAt DateTime
+  endedAt   DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("study_sessions")
+}
+
+model Revision {
+  id          String    @id @default(cuid())
+  userId      String
+  topicId     String
+  interval    Int       // days: 1, 7, 15, 30, 60, 90
+  scheduledAt DateTime
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topic Topic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@map("revisions")
+}
+
+model Goal {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   // hours | questions | flashcards | exams | streak
+  target    Float
+  current   Float    @default(0)
+  period    String   // daily | weekly | monthly
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("goals")
+}
+
+model Achievement {
+  id          String @id @default(cuid())
+  name        String
+  description String
+  icon        String
+  xpReward    Int    @default(50)
+  condition   Json   // {type, target, ...}
+
+  userAchievements UserAchievement[]
+
+  @@map("achievements")
+}
+
+model UserAchievement {
+  id            String   @id @default(cuid())
+  userId        String
+  achievementId String
+  unlockedAt    DateTime @default(now())
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, achievementId])
+  @@map("user_achievements")
+}
+
+model XpHistory {
+  id        String   @id @default(cuid())
+  userId    String
+  amount    Int
+  reason    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("xp_history")
+}
+
+model LibraryItem {
+  id          String   @id @default(cuid())
+  userId      String
+  type        String   // pdf | link | video | note
+  title       String
+  url         String?
+  content     String?  @db.Text
+  topicId     String?
+  tags        String[]
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("library_items")
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  title     String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
