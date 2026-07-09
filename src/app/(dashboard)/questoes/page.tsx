@@ -59,7 +59,7 @@ export default function QuestoesPage() {
     if (filters.difficulty !== "all" && q.difficulty !== filters.difficulty) return false;
     if (filters.search) {
       const s = filters.search.toLowerCase();
-      return q.statement.toLowerCase().includes(s) || q.tags.some((t) => t.includes(s));
+      return q.statement.toLowerCase().includes(s) || q.tags.some((t: string) => t.includes(s));
     }
     return true;
   });
@@ -78,7 +78,7 @@ export default function QuestoesPage() {
   const totalCorrect = MOCK_QUESTIONS.filter((q) => {
     const answer = answers[q.id];
     if (!answer) return false;
-    return q.alternatives.find((a) => a.letter === answer)?.isCorrect;
+    return q.alternatives.find((a: any) => a.letter === answer)?.isCorrect;
   }).length;
 
   const accuracy = totalAnswered > 0 ? Math.round((totalCorrect / totalAnswered) * 100) : 0;
@@ -87,7 +87,7 @@ export default function QuestoesPage() {
     const answered = answers[currentQuestion.id];
     const isCorrect =
       answered &&
-      currentQuestion.alternatives.find((a) => a.letter === answered)?.isCorrect;
+      currentQuestion.alternatives.find((a: any) => a.letter === answered)?.isCorrect;
 
     return (
       <div className="p-6 max-w-3xl mx-auto">
@@ -179,7 +179,7 @@ export default function QuestoesPage() {
 
             {/* Alternatives */}
             <div className="space-y-2 mb-4">
-              {currentQuestion.alternatives.map((alt) => {
+              {currentQuestion.alternatives.map((alt: any) => {
                 const isSelected = answered === alt.letter;
                 const isRevealedNow = revealed.has(currentQuestion.id);
                 const isCorrectAlt = alt.isCorrect;
@@ -375,7 +375,7 @@ export default function QuestoesPage() {
           const answered = answers[q.id];
           const isCorrect =
             answered &&
-            q.alternatives.find((a) => a.letter === answered)?.isCorrect;
+            q.alternatives.find((a: any) => a.letter === answered)?.isCorrect;
 
           return (
             <motion.div
@@ -415,7 +415,7 @@ export default function QuestoesPage() {
                         >
                           {q.difficulty === "easy" ? "Fácil" : q.difficulty === "medium" ? "Médio" : "Difícil"}
                         </Badge>
-                        {q.tags.slice(0, 2).map((tag) => (
+                        {q.tags.slice(0, 2).map((tag: string) => (
                           <Badge key={tag} variant="secondary" className="text-[10px]">
                             {tag}
                           </Badge>
