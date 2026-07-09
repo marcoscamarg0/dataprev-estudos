@@ -125,11 +125,16 @@ export default function IAPage() {
         };
         setMessages((prev) => [...prev, assistantMessage]);
       } else {
-        // Fallback response when API is not configured
+        let errorMessage = "Ocorreu um erro ao conectar com o Tutor IA.";
+        try {
+          const errorData = await response.json();
+          if (errorData.error) errorMessage = errorData.error;
+        } catch (e) {}
+
         const fallback: Message = {
           id: (Date.now() + 1).toString(),
           role: "assistant",
-          content: `Para ativar o Tutor de IA com Ollama, siga estes passos:\n\n1. Instale o Ollama: https://ollama.ai\n2. Execute: \`ollama pull llama3.2\`\n3. Configure \`OLLAMA_BASE_URL=http://localhost:11434\` no \`.env.local\`\n\nAlternativamente, você pode usar o Google Gemini ou OpenAI configurando as chaves de API.\n\nSua pergunta foi: "${content}"`,
+          content: `⚠️ **Erro de Conexão:**\n\n${errorMessage}\n\n*Verifique se a variável \`OPENROUTER_API_KEY\` está configurada corretamente no Render (ou no seu arquivo .env se estiver rodando localmente).*`,
           timestamp: new Date(),
         };
         setMessages((prev) => [...prev, fallback]);
@@ -138,7 +143,7 @@ export default function IAPage() {
       const errorMsg: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: "Não consegui me conectar ao servidor de IA. Verifique se o Ollama está rodando em `http://localhost:11434` ou configure outro provedor no `.env.local`.",
+        content: "⚠️ **Falha de Rede:** Não foi possível alcançar o servidor. Verifique sua conexão com a internet.",
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, errorMsg]);
@@ -206,11 +211,11 @@ export default function IAPage() {
 
           <div className="mt-auto p-2 rounded-md bg-muted/30 border border-border">
             <div className="flex items-center gap-1.5 mb-1">
-              <div className="w-1.5 h-1.5 rounded-full bg-chart-2 animate-pulse" />
-              <span className="text-[10px] font-medium">Ollama</span>
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-[10px] font-medium">OpenRouter (Nemotron)</span>
             </div>
             <p className="text-[10px] text-muted-foreground">
-              Configure em .env.local para ativar o tutor local
+              Conectado via API Key do arquivo de ambiente
             </p>
           </div>
         </div>
@@ -334,7 +339,7 @@ export default function IAPage() {
               </Button>
             </div>
             <p className="text-[10px] text-muted-foreground text-center mt-2">
-              Powered by Ollama (local) · Pressione Enter para enviar
+              Powered by OpenRouter · Pressione Enter para enviar
             </p>
           </div>
         </div>
