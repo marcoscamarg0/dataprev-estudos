@@ -1,10 +1,19 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { getUserFromCookie } from "@/lib/auth";
+import { NextResponse, NextRequest } from "next/server";
+import { prisma } from "@/lib/db";
+import { getUserFromRequest } from "@/lib/auth";
 
-export async function PATCH(request: Request, { params }: { params: { id: string } }) {
+export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const adminUser = await getUserFromCookie();
+    const payload = getUserFromRequest(request);
+    if (!payload) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const adminUser = await prisma.user.findUnique({
+      where: { id: payload.userId },
+      select: { role: true }
+    });
+
     if (!adminUser || adminUser.role !== "ADMIN") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
