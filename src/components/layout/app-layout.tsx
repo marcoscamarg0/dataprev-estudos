@@ -388,14 +388,6 @@ export function AppLayout({ children }: AppLayoutProps) {
         {/* Top bar */}
         <header className="flex items-center justify-between h-14 px-3 sm:px-4 border-b border-border bg-background/80 backdrop-blur-sm shrink-0">
           <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-            {/* Mobile hamburger */}
-            <button
-              onClick={() => setMobileOpen(true)}
-              className="md:hidden p-2 rounded-md hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-colors shrink-0"
-            >
-              <Menu size={18} />
-            </button>
-
             {/* Search */}
             <button
               onClick={() => setGlobalSearchOpen(true)}
@@ -467,7 +459,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto pb-[calc(3.5rem+env(safe-area-inset-bottom))] md:pb-0">
           <motion.div
             key={pathname}
             initial={{ opacity: 0, y: 4 }}
@@ -478,6 +470,32 @@ export function AppLayout({ children }: AppLayoutProps) {
             {children}
           </motion.div>
         </main>
+      </div>
+
+      {/* ── Mobile Bottom Navigation ── */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-background/80 backdrop-blur-xl" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+        <div className="flex items-center justify-around h-14 px-1">
+          <Link href="/dashboard" className={cn("flex flex-col items-center justify-center w-full h-full space-y-1 text-muted-foreground hover:text-foreground transition-colors", pathname === "/dashboard" && "text-foreground")}>
+            <LayoutDashboard size={20} className={pathname === "/dashboard" ? "text-indigo-500" : ""} />
+            <span className="text-[10px] font-medium">Início</span>
+          </Link>
+          <Link href="/vagas" className={cn("flex flex-col items-center justify-center w-full h-full space-y-1 text-muted-foreground hover:text-foreground transition-colors", pathname === "/vagas" && "text-foreground")}>
+            <Briefcase size={20} className={pathname === "/vagas" ? "text-indigo-500" : ""} />
+            <span className="text-[10px] font-medium">Vagas</span>
+          </Link>
+          <Link href="/curriculo" className={cn("flex flex-col items-center justify-center w-full h-full space-y-1 text-muted-foreground hover:text-foreground transition-colors", pathname === "/curriculo" && "text-foreground")}>
+            <FileUser size={20} className={pathname === "/curriculo" ? "text-indigo-500" : ""} />
+            <span className="text-[10px] font-medium">Currículo</span>
+          </Link>
+          <Link href="/questoes" className={cn("flex flex-col items-center justify-center w-full h-full space-y-1 text-muted-foreground hover:text-foreground transition-colors", pathname === "/questoes" && "text-foreground")}>
+            <HelpCircle size={20} className={pathname === "/questoes" ? "text-indigo-500" : ""} />
+            <span className="text-[10px] font-medium">Questões</span>
+          </Link>
+          <button onClick={() => setMobileOpen(true)} className="flex flex-col items-center justify-center w-full h-full space-y-1 text-muted-foreground hover:text-foreground transition-colors">
+            <Menu size={20} />
+            <span className="text-[10px] font-medium">Menu</span>
+          </button>
+        </div>
       </div>
     </div>
   );

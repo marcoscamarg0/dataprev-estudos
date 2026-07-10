@@ -1,11 +1,11 @@
 {
-  "name": "DATAPREV 2026 — Plataforma de Estudos",
-  "short_name": "DATAPREV 2026",
-  "description": "Plataforma premium de preparação para o concurso DATAPREV 2026",
+  "name": "Trampo Hub — Concursos e Vagas Privadas",
+  "short_name": "Trampo Hub",
+  "description": "Hub completo para você conquistar seu próximo emprego. Vagas, simulados e currículo IA.",
   "start_url": "/dashboard",
   "display": "standalone",
   "background_color": "#0a0a0a",
-  "theme_color": "#0a0a0a",
+  "theme_color": "#4f46e5",
   "orientation": "portrait-primary",
   "icons": [
     {

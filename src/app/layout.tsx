@@ -33,6 +33,10 @@ export const metadata: Metadata = {
     statusBarStyle: "black-translucent",
     title: "Trampo Hub",
   },
+  icons: {
+    icon: "/icon-192.png",
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export const viewport: Viewport = {
