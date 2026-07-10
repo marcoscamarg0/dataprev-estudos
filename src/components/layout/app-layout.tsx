@@ -385,8 +385,7 @@ export function AppLayout({ children }: AppLayoutProps) {
 
       {/* ── Main content ── */}
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
-        {/* Top bar */}
-        <header className="flex items-center justify-between h-14 px-3 sm:px-4 border-b border-border bg-background/80 backdrop-blur-sm shrink-0">
+        <header className="flex items-center justify-between h-14 px-3 sm:px-4 border-b border-border bg-background shrink-0 z-10">
           <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
             {/* Search */}
             <button

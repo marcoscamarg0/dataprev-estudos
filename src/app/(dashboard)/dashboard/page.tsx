@@ -187,7 +187,7 @@ export default function DashboardPage() {
       >
         {/* Stats row */}
         {STATS.map((stat) => (
-          <motion.div key={stat.label} variants={item} className="col-span-3">
+          <motion.div key={stat.label} variants={item} className="col-span-12 sm:col-span-6 lg:col-span-3">
             <Card className="card-hover">
               <CardContent className="pt-4">
                 <div className="flex items-start justify-between mb-3">
@@ -211,7 +211,7 @@ export default function DashboardPage() {
         ))}
 
         {/* Weekly chart */}
-        <motion.div variants={item} className="col-span-8">
+        <motion.div variants={item} className="col-span-12 lg:col-span-8">
           <Card className="card-hover">
             <CardHeader className="p-4 pb-0">
               <div className="flex items-center justify-between">
@@ -279,7 +279,7 @@ export default function DashboardPage() {
         </motion.div>
 
         {/* Approval probability */}
-        <motion.div variants={item} className="col-span-4">
+        <motion.div variants={item} className="col-span-12 lg:col-span-4">
           <Card className="card-hover h-full">
             <CardContent className="p-4 flex flex-col h-full">
               <div className="flex items-center gap-2 mb-4">
@@ -325,7 +325,7 @@ export default function DashboardPage() {
         </motion.div>
 
         {/* Heatmap */}
-        <motion.div variants={item} className="col-span-8">
+        <motion.div variants={item} className="col-span-12 lg:col-span-8">
           <Card className="card-hover">
             <CardHeader className="p-4 pb-2">
               <div className="flex items-center justify-between">
@@ -350,7 +350,7 @@ export default function DashboardPage() {
         </motion.div>
 
         {/* Radar chart */}
-        <motion.div variants={item} className="col-span-4">
+        <motion.div variants={item} className="col-span-12 sm:col-span-6 lg:col-span-4">
           <Card className="card-hover h-full">
             <CardHeader className="p-4 pb-0">
               <CardTitle className="text-sm">Radar de Desempenho</CardTitle>
@@ -378,7 +378,7 @@ export default function DashboardPage() {
         </motion.div>
 
         {/* Progress by subject */}
-        <motion.div variants={item} className="col-span-4">
+        <motion.div variants={item} className="col-span-12 sm:col-span-6 lg:col-span-4">
           <Card className="card-hover h-full">
             <CardHeader className="p-4 pb-2">
               <div className="flex items-center justify-between">
@@ -422,7 +422,7 @@ export default function DashboardPage() {
         </motion.div>
 
         {/* Upcoming revisions */}
-        <motion.div variants={item} className="col-span-4">
+        <motion.div variants={item} className="col-span-12 sm:col-span-6 lg:col-span-4">
           <Card className="card-hover h-full">
             <CardHeader className="p-4 pb-2">
               <div className="flex items-center justify-between">
@@ -471,7 +471,7 @@ export default function DashboardPage() {
         </motion.div>
 
         {/* Recent activity + XP */}
-        <motion.div variants={item} className="col-span-4">
+        <motion.div variants={item} className="col-span-12 sm:col-span-6 lg:col-span-4">
           <Card className="card-hover h-full">
             <CardHeader className="p-4 pb-2">
               <CardTitle className="text-sm">Nível & XP</CardTitle>
