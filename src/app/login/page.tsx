@@ -58,10 +58,12 @@ function LoginForm() {
         <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-600">
           <GraduationCap className="h-6 w-6 text-white" />
         </div>
-        <h1 className="text-2xl font-semibold text-foreground">Entrar</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Acesse sua plataforma de estudos DATAPREV 2026
-        </p>
+        <div className="flex flex-col space-y-2 text-center">
+          <h1 className="text-2xl font-bold tracking-tight">Bem-vindo de volta!</h1>
+          <p className="text-sm text-muted-foreground">
+            Acesse seu hub de oportunidades e estudos
+          </p>
+        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">

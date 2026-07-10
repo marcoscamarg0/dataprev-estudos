@@ -15,13 +15,15 @@ import {
   Star,
   StickyNote,
 } from "lucide-react";
-import { DATAPREV_CURRICULUM, type SubjectData } from "@/lib/curriculum";
+import { type SubjectData } from "@/lib/curriculum";
+import { useActiveCurriculum, useCurriculumStore, useActiveEditalOverview } from "@/store/curriculumStore";
 import { cn } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Info } from "lucide-react";
 
 type Status = "not_started" | "studying" | "review" | "mastered";
 
@@ -44,7 +46,12 @@ export default function EditalPage() {
   const [expandedTopics, setExpandedTopics] = useState<Set<string>>(new Set());
   const [topicStatus, setTopicStatus] = useState<Record<string, Status>>({});
 
-  const filteredCurriculum = DATAPREV_CURRICULUM.filter((subj) => {
+  const activeCurriculum = useActiveCurriculum();
+  const { editais, activeEditalId, setActiveEdital } = useCurriculumStore();
+  const activeTitle = editais.find(e => e.id === activeEditalId)?.title || "Edital Desconhecido";
+  const activeOverview = useActiveEditalOverview();
+
+  const filteredCurriculum = activeCurriculum.filter((subj) => {
     if (filter !== "all" && subj.category !== filter) return false;
     if (search) {
       const q = search.toLowerCase();
@@ -60,8 +67,8 @@ export default function EditalPage() {
     return true;
   });
 
-  const totalTopics = DATAPREV_CURRICULUM.reduce((a, s) => a + s.topics.length, 0);
-  const masteredTopics = Object.values(topicStatus).filter((s) => s === "mastered").length;
+  const totalTopics = activeCurriculum.reduce((a, s) => a + s.topics.length, 0);
+  const masteredTopics = Object.values(mockProgress).filter((p) => p.status === "mastered").length;
   const studyingTopics = Object.values(topicStatus).filter((s) => s === "studying").length;
   const overallProgress = Math.round((masteredTopics / totalTopics) * 100);
 
@@ -91,12 +98,43 @@ export default function EditalPage() {
   return (
     <div className="p-6 max-w-[1400px] mx-auto">
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-xl font-semibold">Edital DATAPREV 2026</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">
-          Acompanhe seu progresso em cada disciplina do edital FGV
-        </p>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+        <div>
+          <h1 className="text-xl font-semibold">Resumo do Edital</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Acompanhe seu progresso em cada disciplina
+          </p>
+        </div>
+        <div className="w-full sm:w-auto">
+          <select 
+            value={activeEditalId}
+            onChange={(e) => setActiveEdital(e.target.value)}
+            className="w-full sm:w-[300px] h-10 px-3 py-2 bg-background border rounded-md text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
+            {editais.map(edital => (
+              <option key={edital.id} value={edital.id}>
+                {edital.title} {edital.role ? `- ${edital.role}` : ""}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
+
+      {activeOverview && (
+        <Card className="mb-6 border-indigo-500/20 bg-indigo-50/30 dark:bg-indigo-900/10">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg flex items-center gap-2 text-indigo-700 dark:text-indigo-400">
+              <Info size={18} />
+              Resumo da Vaga (Análise da IA)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">
+              {activeOverview}
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Overview cards */}
       <div className="grid grid-cols-4 gap-3 mb-6">

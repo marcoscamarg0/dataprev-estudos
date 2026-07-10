@@ -12,25 +12,26 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("http://localhost:3000"),
   title: {
-    default: "DATAPREV 2026 — Plataforma de Estudos",
-    template: "%s | DATAPREV 2026",
+    default: "Trampo Hub — Concursos e Vagas Privadas",
+    template: "%s | Trampo Hub",
   },
   description:
-    "Plataforma premium de preparação para o concurso DATAPREV 2026. Organização completa do edital, simulados inteligentes, flashcards e tutor de IA.",
-  keywords: ["DATAPREV", "concurso", "estudos", "simulado", "flashcard", "FGV"],
-  authors: [{ name: "DATAPREV Estudos" }],
+    "Hub completo para você conquistar seu próximo emprego. Prepare-se para concursos com simulados e flashcards, acompanhe editais abertos e encontre vagas no setor privado.",
+  keywords: ["vagas", "concursos", "estudos", "simulado", "emprego", "carreira"],
+  authors: [{ name: "Trampo Hub" }],
   openGraph: {
     type: "website",
     locale: "pt_BR",
-    title: "DATAPREV 2026 — Plataforma de Estudos",
-    description: "Plataforma premium de preparação para o concurso DATAPREV 2026",
+    title: "Trampo Hub — Concursos e Vagas Privadas",
+    description: "Hub completo para você conquistar seu próximo emprego.",
   },
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "DATAPREV 2026",
+    title: "Trampo Hub",
   },
 };
 

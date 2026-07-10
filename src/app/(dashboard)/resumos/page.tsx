@@ -25,7 +25,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { DATAPREV_CURRICULUM } from "@/lib/curriculum";
 
 interface Note {
   id: string;

@@ -24,7 +24,6 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
-import { DATAPREV_CURRICULUM } from "@/lib/curriculum";
 
 interface Flashcard {
   id: string;

@@ -21,7 +21,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { cn, formatMinutes, getDaysUntil, EXAM_DATE } from "@/lib/utils";
-import { DATAPREV_CURRICULUM } from "@/lib/curriculum";
 
 // Auto-generated schedule based on weak subjects and days remaining
 const SCHEDULE_TODAY = [

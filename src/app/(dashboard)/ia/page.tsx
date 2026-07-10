@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Bot,
@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useActiveCurriculum, useActiveEditalTitle } from "@/store/curriculumStore";
 
 interface Message {
   id: string;
@@ -29,23 +30,7 @@ interface Message {
   timestamp: Date;
 }
 
-const QUICK_PROMPTS = [
-  { icon: "☕", text: "Explique Injeção de Dependência no Spring", category: "spring" },
-  { icon: "🐳", text: "Como funciona o Docker e containers?", category: "docker" },
-  { icon: "⚡", text: "Qual a diferença entre SQL e NoSQL?", category: "banco" },
-  { icon: "🔒", text: "Explique JWT e autenticação stateless", category: "segurança" },
-  { icon: "🏗️", text: "O que é Clean Architecture?", category: "arquitetura" },
-  { icon: "📡", text: "Como funciona o protocolo HTTP/2?", category: "redes" },
-  { icon: "🧪", text: "Explique TDD e como escrever testes unitários", category: "testes" },
-  { icon: "☁️", text: "Quais são os principais serviços AWS?", category: "cloud" },
-];
 
-const INITIAL_MESSAGE: Message = {
-  id: "0",
-  role: "assistant",
-  content: `Olá! Sou seu tutor de IA para o concurso DATAPREV 2026. Estou aqui para ajudar com todos os conteúdos do edital:\n\n• **Java & Spring Framework** — desde fundamentos até microserviços\n• **Docker & Kubernetes** — containerização e orquestração\n• **Banco de Dados** — SQL, NoSQL, modelagem e performance\n• **APIs REST** — design, versionamento, OpenAPI\n• **DevOps & Cloud** — CI/CD, AWS, infraestrutura\n• **Redes & Segurança** — protocolos, OWASP, criptografia\n• **Clean Code & Design Patterns** — SOLID, padrões GoF\n\nPode me perguntar qualquer coisa, pedir exemplos de código, explicações de questões ou criar um cronograma de estudos. Como posso ajudar?`,
-  timestamp: new Date(),
-};
 
 function formatMessage(content: string) {
   // Basic markdown rendering
@@ -76,11 +61,37 @@ function formatMessage(content: string) {
 }
 
 export default function IAPage() {
-  const [messages, setMessages] = useState<Message[]>([INITIAL_MESSAGE]);
+  const activeCurriculum = useActiveCurriculum();
+  const activeTitle = useActiveEditalTitle();
+  
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  // Dynamic Initial Message based on Edital
+  useEffect(() => {
+    if (messages.length === 0) {
+      const subjectList = activeCurriculum.slice(0, 5).map(s => `• **${s.name}**`).join("\\n");
+      const initial: Message = {
+        id: "0",
+        role: "assistant",
+        content: `Olá! Sou seu Tutor de IA focado no edital **${activeTitle}**. Estou aqui para ajudar com os conteúdos da sua prova:\\n\\n${subjectList}\\n${activeCurriculum.length > 5 ? "• ... e muito mais!\\n" : ""}\\nPode me perguntar qualquer coisa, pedir resumos, explicações de questões ou dicas de estudos baseadas nas disciplinas do seu edital. Como posso ajudar?`,
+        timestamp: new Date(),
+      };
+      setMessages([initial]);
+    }
+  }, [activeTitle, activeCurriculum, messages.length]);
+
+  // Dynamic Quick Prompts
+  const quickPrompts = activeCurriculum.flatMap(subj => 
+    subj.topics.slice(0, 2).map(t => ({
+      icon: "💡",
+      text: `Explique ${t.name}`,
+      category: subj.name
+    }))
+  ).sort(() => 0.5 - Math.random()).slice(0, 6);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -170,15 +181,15 @@ export default function IAPage() {
               <span className="text-xs font-semibold">Sugestões Rápidas</span>
             </div>
             <div className="space-y-1">
-              {QUICK_PROMPTS.map((prompt, i) => (
+              {quickPrompts.map((qp, i) => (
                 <button
                   key={i}
-                  onClick={() => sendMessage(prompt.text)}
+                  onClick={() => sendMessage(qp.text)}
                   className="w-full text-left flex items-start gap-2 p-2 rounded-md hover:bg-muted/50 transition-colors group"
                 >
-                  <span className="text-sm shrink-0 mt-0.5">{prompt.icon}</span>
+                  <span className="text-sm shrink-0 mt-0.5">{qp.icon}</span>
                   <span className="text-[11px] text-muted-foreground group-hover:text-foreground transition-colors line-clamp-2">
-                    {prompt.text}
+                    {qp.text}
                   </span>
                 </button>
               ))}

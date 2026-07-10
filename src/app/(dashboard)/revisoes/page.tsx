@@ -16,7 +16,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
-import { DATAPREV_CURRICULUM } from "@/lib/curriculum";
 
 const INTERVALS = [1, 7, 15, 30, 60, 90];
 

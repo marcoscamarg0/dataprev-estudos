@@ -21,7 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { cn, formatTime, formatMinutes } from "@/lib/utils";
-import { DATAPREV_CURRICULUM } from "@/lib/curriculum";
+import { useActiveCurriculum } from "@/store/curriculumStore";
 import { useTimerStore } from "@/store";
 
 interface StudySession {
@@ -39,11 +39,12 @@ const MOCK_HISTORY: StudySession[] = [
   { topicName: "REST APIs", duration: 25, type: "pomodoro", timestamp: new Date(Date.now() - 2 * 86400000) },
 ];
 
-const TOPICS_FLAT = DATAPREV_CURRICULUM.flatMap((s) =>
-  s.topics.map((t) => ({ id: t.id, name: `${s.name} — ${t.name}`, subjectColor: s.color }))
-);
-
 export default function TimerPage() {
+  const activeCurriculum = useActiveCurriculum();
+  
+  const TOPICS_FLAT = activeCurriculum.flatMap((s) =>
+    s.topics.map((t) => ({ id: t.id, name: `${s.name} — ${t.name}`, subjectColor: s.color }))
+  );
   const {
     isRunning,
     mode,

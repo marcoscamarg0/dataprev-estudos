@@ -34,21 +34,35 @@ import {
   RefreshCw,
   PenSquare,
   Shield,
+  Menu,
+  X,
+  FileUser,
+  Briefcase,
+  SearchCheck,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 
 const NAV_ITEMS = [
   {
-    section: "Principal",
+    section: "Oportunidades",
+    items: [
+      { href: "/concursos", icon: SearchCheck, label: "Editais" },
+      { href: "/vagas", icon: Briefcase, label: "Vagas Privadas" },
+    ],
+  },
+  {
+    section: "Carreira & IA",
+    items: [
+      { href: "/curriculo", icon: FileUser, label: "Currículo IA" },
+      { href: "/ia", icon: Bot, label: "Tutor Carreira" },
+    ],
+  },
+  {
+    section: "Meus Estudos",
     items: [
       { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
       { href: "/edital", icon: FileText, label: "Edital" },
       { href: "/cronograma", icon: Calendar, label: "Cronograma" },
-    ],
-  },
-  {
-    section: "Estudo",
-    items: [
       { href: "/questoes", icon: HelpCircle, label: "Questões" },
       { href: "/simulados", icon: Zap, label: "Simulados" },
       { href: "/flashcards", icon: BookOpen, label: "Flashcards" },
@@ -60,23 +74,173 @@ const NAV_ITEMS = [
     section: "Ferramentas",
     items: [
       { href: "/timer", icon: Timer, label: "Timer" },
-      { href: "/ia", icon: Bot, label: "Tutor IA" },
       { href: "/biblioteca", icon: Library, label: "Biblioteca" },
-    ],
-  },
-  {
-    section: "Análise",
-    items: [
-      { href: "/estatisticas", icon: BarChart3, label: "Estatísticas" },
-      { href: "/metas", icon: Target, label: "Metas" },
-      { href: "/conquistas", icon: Trophy, label: "Conquistas" },
-      { href: "/ranking", icon: Flame, label: "Ranking Global" },
+      { href: "/ranking", icon: Trophy, label: "Ranking" },
+      { href: "/conquistas", icon: Shield, label: "Conquistas" },
     ],
   },
 ];
 
 interface AppLayoutProps {
   children: React.ReactNode;
+}
+
+function SidebarContent({
+  isEffectivelyCollapsed,
+  pathname,
+  user,
+  daysLeft,
+  onItemClick,
+}: {
+  isEffectivelyCollapsed: boolean;
+  pathname: string | null;
+  user: { role?: string; name?: string; avatar?: string } | null;
+  daysLeft: number;
+  onItemClick?: () => void;
+}) {
+  const router = useRouter();
+  const { logout } = useAuthStore();
+
+  return (
+    <>
+      {/* Logo */}
+      <div className="flex items-center h-14 px-3 border-b border-sidebar-border shrink-0">
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="w-7 h-7 rounded-md bg-chart-1 flex items-center justify-center shrink-0">
+            <span className="text-white text-xs font-bold">D</span>
+          </div>
+          <AnimatePresence>
+            {!isEffectivelyCollapsed && (
+              <motion.div
+                initial={{ opacity: 0, x: -8 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -8 }}
+                transition={{ duration: 0.15 }}
+                className="min-w-0"
+              >
+                <p className="text-sm font-semibold text-sidebar-foreground truncate">
+                  Trampo Hub
+                </p>
+                <p className="text-[10px] text-muted-foreground">
+                  Concursos & Vagas
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+
+      {/* Navigation */}
+      <div className="flex-1 overflow-y-auto overflow-x-hidden py-3 no-scrollbar">
+        {NAV_ITEMS.map((section) => (
+          <div key={section.section} className="mb-4">
+            <AnimatePresence>
+              {!isEffectivelyCollapsed && (
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground px-3 mb-1"
+                >
+                  {section.section}
+                </motion.p>
+              )}
+            </AnimatePresence>
+            <nav className="space-y-0.5 px-1.5">
+              {section.items.map((item) => {
+                const active =
+                  pathname === item.href ||
+                  pathname?.startsWith(item.href + "/");
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={onItemClick}
+                  >
+                    <div
+                      className={cn(
+                        "sidebar-item",
+                        active && "active",
+                        isEffectivelyCollapsed && "justify-center px-0"
+                      )}
+                      title={isEffectivelyCollapsed ? item.label : undefined}
+                    >
+                      <item.icon
+                        size={18}
+                        className={active ? "text-foreground" : ""}
+                      />
+                      <AnimatePresence>
+                        {!isEffectivelyCollapsed && (
+                          <motion.span
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.1 }}
+                            className="truncate"
+                          >
+                            {item.label}
+                          </motion.span>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
+        ))}
+      </div>
+
+      {/* Exam countdown */}
+      <AnimatePresence>
+        {!isEffectivelyCollapsed && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="mx-2 mb-2 p-3 rounded-md bg-chart-1/10 border border-chart-1/20"
+          >
+            <p className="text-[10px] font-medium text-chart-1 mb-1">
+              PROVA EM
+            </p>
+            <p className="text-2xl font-bold text-foreground leading-none">
+              {daysLeft}
+            </p>
+            <p className="text-[10px] text-muted-foreground">dias restantes</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Admin Link (Conditional) */}
+      {user?.role === "ADMIN" && (
+        <div className="px-1.5 mb-2 mt-2">
+          <Link href="/admin" onClick={onItemClick}>
+            <div
+              className={cn(
+                "sidebar-item text-amber-500 hover:text-amber-400 hover:bg-amber-500/10",
+                isEffectivelyCollapsed && "justify-center px-0"
+              )}
+              title={isEffectivelyCollapsed ? "Painel Admin" : undefined}
+            >
+              <Shield size={18} />
+              <AnimatePresence>
+                {!isEffectivelyCollapsed && (
+                  <motion.span
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="truncate text-sm font-medium"
+                  >
+                    Painel Admin
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </div>
+          </Link>
+        </div>
+      )}
+    </>
+  );
 }
 
 export function AppLayout({ children }: AppLayoutProps) {
@@ -87,154 +251,87 @@ export function AppLayout({ children }: AppLayoutProps) {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const daysLeft = getDaysUntil(EXAM_DATE);
-  
+
   const isEffectivelyCollapsed = sidebarCollapsed && !isHovered;
 
   useEffect(() => setMounted(true), []);
 
+  // Close mobile drawer on route change
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
+
   return (
     <div className="flex h-screen bg-background overflow-hidden">
-      {/* Sidebar */}
+      {/* ── Mobile Overlay ── */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 bg-black/50 z-30 md:hidden"
+            onClick={() => setMobileOpen(false)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* ── Mobile Drawer ── */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.aside
+            initial={{ x: -280 }}
+            animate={{ x: 0 }}
+            exit={{ x: -280 }}
+            transition={{ type: "spring", damping: 28, stiffness: 300 }}
+            className="fixed top-0 left-0 h-full w-[280px] flex flex-col border-r border-border bg-sidebar z-40 md:hidden overflow-hidden"
+          >
+            {/* Close button */}
+            <button
+              onClick={() => setMobileOpen(false)}
+              className="absolute top-3 right-3 p-1.5 rounded-md hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-colors z-10"
+            >
+              <X size={16} />
+            </button>
+
+            <SidebarContent
+              isEffectivelyCollapsed={false}
+              pathname={pathname}
+              user={user}
+              daysLeft={daysLeft}
+              onItemClick={() => setMobileOpen(false)}
+            />
+
+            {/* Bottom settings */}
+            <div className="border-t border-sidebar-border p-2 space-y-0.5">
+              <Link href="/configuracoes" onClick={() => setMobileOpen(false)}>
+                <div className="sidebar-item">
+                  <Settings size={18} />
+                  <span className="truncate text-xs">Configurações</span>
+                </div>
+              </Link>
+            </div>
+          </motion.aside>
+        )}
+      </AnimatePresence>
+
+      {/* ── Desktop Sidebar ── */}
       <motion.aside
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         animate={{ width: isEffectivelyCollapsed ? 56 : 280 }}
         transition={{ duration: 0.2, ease: "easeInOut" }}
-        className="relative flex flex-col border-r border-border bg-sidebar shrink-0 overflow-hidden z-20"
+        className="relative hidden md:flex flex-col border-r border-border bg-sidebar shrink-0 overflow-hidden z-20"
       >
-        {/* Logo */}
-        <div className="flex items-center h-14 px-3 border-b border-sidebar-border shrink-0">
-          <div className="flex items-center gap-2 min-w-0">
-            <div className="w-7 h-7 rounded-md bg-chart-1 flex items-center justify-center shrink-0">
-              <span className="text-white text-xs font-bold">D</span>
-            </div>
-            <AnimatePresence>
-              {!isEffectivelyCollapsed && (
-                <motion.div
-                  initial={{ opacity: 0, x: -8 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -8 }}
-                  transition={{ duration: 0.15 }}
-                  className="min-w-0"
-                >
-                  <p className="text-sm font-semibold text-sidebar-foreground truncate">
-                    DATAPREV 2026
-                  </p>
-                  <p className="text-[10px] text-muted-foreground">
-                    Dev. de Software
-                  </p>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        </div>
-
-        {/* Navigation */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden py-3 no-scrollbar">
-          {NAV_ITEMS.map((section) => (
-            <div key={section.section} className="mb-4">
-              <AnimatePresence>
-                {!isEffectivelyCollapsed && (
-                  <motion.p
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground px-3 mb-1"
-                  >
-                    {section.section}
-                  </motion.p>
-                )}
-              </AnimatePresence>
-              <nav className="space-y-0.5 px-1.5">
-                {section.items.map((item) => {
-                  const active =
-                    pathname === item.href ||
-                    pathname?.startsWith(item.href + "/");
-                  return (
-                    <Link key={item.href} href={item.href}>
-                      <div
-                        className={cn(
-                          "sidebar-item",
-                          active && "active",
-                          isEffectivelyCollapsed && "justify-center px-0"
-                        )}
-                        title={isEffectivelyCollapsed ? item.label : undefined}
-                      >
-                        <item.icon
-                          size={18}
-                          className={active ? "text-foreground" : ""}
-                        />
-                        <AnimatePresence>
-                          {!isEffectivelyCollapsed && (
-                            <motion.span
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 1 }}
-                              exit={{ opacity: 0 }}
-                              transition={{ duration: 0.1 }}
-                              className="truncate"
-                            >
-                              {item.label}
-                            </motion.span>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                    </Link>
-                  );
-                })}
-              </nav>
-            </div>
-          ))}
-        </div>
-
-        {/* Exam countdown */}
-        <AnimatePresence>
-          {!isEffectivelyCollapsed && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="mx-2 mb-2 p-3 rounded-md bg-chart-1/10 border border-chart-1/20"
-            >
-              <p className="text-[10px] font-medium text-chart-1 mb-1">
-                PROVA EM
-              </p>
-              <p className="text-2xl font-bold text-foreground leading-none">
-                {daysLeft}
-              </p>
-              <p className="text-[10px] text-muted-foreground">dias restantes</p>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Admin Link (Conditional) */}
-        {user?.role === "ADMIN" && (
-          <div className="px-1.5 mb-2 mt-2">
-            <Link href="/admin">
-              <div
-                className={cn(
-                  "sidebar-item text-amber-500 hover:text-amber-400 hover:bg-amber-500/10",
-                  isEffectivelyCollapsed && "justify-center px-0"
-                )}
-                title={isEffectivelyCollapsed ? "Painel Admin" : undefined}
-              >
-                <Shield size={18} />
-                <AnimatePresence>
-                  {!isEffectivelyCollapsed && (
-                    <motion.span
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      className="truncate text-sm font-medium"
-                    >
-                      Painel Admin
-                    </motion.span>
-                  )}
-                </AnimatePresence>
-              </div>
-            </Link>
-          </div>
-        )}
+        <SidebarContent
+          isEffectivelyCollapsed={isEffectivelyCollapsed}
+          pathname={pathname}
+          user={user}
+          daysLeft={daysLeft}
+        />
 
         {/* Bottom: Settings & Collapse */}
         <div className="border-t border-sidebar-border p-2 space-y-0.5">
@@ -286,26 +383,37 @@ export function AppLayout({ children }: AppLayoutProps) {
         </div>
       </motion.aside>
 
-      {/* Main content */}
+      {/* ── Main content ── */}
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
         {/* Top bar */}
-        <header className="flex items-center justify-between h-14 px-4 border-b border-border bg-background/80 backdrop-blur-sm shrink-0">
-          {/* Search */}
-          <button
-            onClick={() => setGlobalSearchOpen(true)}
-            className="flex items-center gap-2 px-3 h-8 rounded-md border border-border bg-muted/50 text-muted-foreground text-sm hover:bg-muted hover:text-foreground transition-colors min-w-[200px] max-w-sm w-full"
-          >
-            <Search size={13} />
-            <span className="flex-1 text-left text-xs">Pesquisar tudo...</span>
-            <kbd className="text-[10px] bg-background border border-border rounded px-1">
-              ⌘K
-            </kbd>
-          </button>
+        <header className="flex items-center justify-between h-14 px-3 sm:px-4 border-b border-border bg-background/80 backdrop-blur-sm shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+            {/* Mobile hamburger */}
+            <button
+              onClick={() => setMobileOpen(true)}
+              className="md:hidden p-2 rounded-md hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-colors shrink-0"
+            >
+              <Menu size={18} />
+            </button>
+
+            {/* Search */}
+            <button
+              onClick={() => setGlobalSearchOpen(true)}
+              className="flex items-center gap-2 px-3 h-8 rounded-md border border-border bg-muted/50 text-muted-foreground text-sm hover:bg-muted hover:text-foreground transition-colors w-full max-w-[180px] sm:max-w-sm"
+            >
+              <Search size={13} />
+              <span className="flex-1 text-left text-xs hidden sm:block">Pesquisar tudo...</span>
+              <span className="flex-1 text-left text-xs sm:hidden">Buscar...</span>
+              <kbd className="text-[10px] bg-background border border-border rounded px-1 hidden sm:block">
+                ⌘K
+              </kbd>
+            </button>
+          </div>
 
           {/* Right side */}
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 shrink-0">
             {/* Streak */}
-            <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-amber-500/10 mr-2">
+            <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-amber-500/10 mr-1 sm:mr-2">
               <Flame size={13} className="text-amber-500" />
               <span className="text-xs font-semibold text-amber-500">7</span>
             </div>

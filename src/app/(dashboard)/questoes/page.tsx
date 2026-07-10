@@ -19,6 +19,7 @@ import {
   Shuffle,
   ChevronRight,
   ChevronLeft,
+  Bot,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -26,10 +27,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
-import { DATAPREV_CURRICULUM } from "@/lib/curriculum";
-
-// Mock question bank
-const MOCK_QUESTIONS: any[] = [];
+import { useActiveCurriculum, useActiveEditalTitle } from "@/store/curriculumStore";
 
 type FilterState = {
   subject: string;
@@ -54,8 +52,54 @@ export default function QuestoesPage() {
     banca: "all",
     search: "",
   });
+  const [questions, setQuestions] = useState<any[]>([]);
+  const [isGenerating, setIsGenerating] = useState(false);
 
-  const filteredQuestions = MOCK_QUESTIONS.filter((q) => {
+  const activeCurriculum = useActiveCurriculum();
+  const activeTitle = useActiveEditalTitle();
+
+  const generateQuestions = async () => {
+    setIsGenerating(true);
+    try {
+      // Pick 2 random subjects to avoid overloading the prompt
+      const shuffledSubjects = [...activeCurriculum].sort(() => 0.5 - Math.random());
+      const selectedSubjects = shuffledSubjects.slice(0, 2);
+
+      const res = await fetch("/api/ai/generate-questions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          editalTitle: activeTitle,
+          subjects: selectedSubjects,
+          count: 3 // Generate 3 questions for quick study session (to prevent API timeouts)
+        }),
+      });
+
+      if (!res.ok) throw new Error("Erro ao gerar questões");
+      const data = await res.json();
+      
+      if (data.questions && data.questions.length > 0) {
+        const processedQuestions = data.questions.map((q: any, i: number) => ({
+          ...q,
+          id: q.id || `gen-${Date.now()}-${i}`
+        }));
+        setQuestions(processedQuestions);
+        setMode("solving");
+        setCurrentIndex(0);
+        setAnswers({});
+        setRevealed(new Set());
+      } else {
+        throw new Error("Formato de questões vazio ou inválido.");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Falha ao gerar questões com IA. Tente novamente.");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const filteredQuestions = questions.filter((q) => {
     if (filters.difficulty !== "all" && q.difficulty !== filters.difficulty) return false;
     if (filters.search) {
       const s = filters.search.toLowerCase();
@@ -75,7 +119,7 @@ export default function QuestoesPage() {
   };
 
   const totalAnswered = Object.keys(answers).length;
-  const totalCorrect = MOCK_QUESTIONS.filter((q) => {
+  const totalCorrect = questions.filter((q) => {
     const answer = answers[q.id];
     if (!answer) return false;
     return q.alternatives.find((a: any) => a.letter === answer)?.isCorrect;
@@ -298,20 +342,16 @@ export default function QuestoesPage() {
   return (
     <div className="p-6 max-w-[1400px] mx-auto">
       {/* Header */}
-      <div className="flex items-start justify-between mb-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-xl font-semibold">Banco de Questões</h1>
+          <h1 className="text-xl font-semibold">Questões</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            {MOCK_QUESTIONS.length} questões · FGV DATAPREV 2026
+            Treine com questões baseadas no edital: <strong className="font-medium text-foreground">{activeTitle}</strong>
           </p>
         </div>
-        <Button
-          variant="indigo"
-          size="sm"
-          onClick={() => { setCurrentIndex(0); setMode("solving"); }}
-        >
-          <BookOpen size={13} />
-          Resolver Questões
+        <Button onClick={generateQuestions} disabled={isGenerating} className="bg-indigo-600 hover:bg-indigo-700">
+          <Bot className="mr-2" size={16} />
+          {isGenerating ? "Gerando Bateria..." : "Gerar Bateria com IA"}
         </Button>
       </div>
 
