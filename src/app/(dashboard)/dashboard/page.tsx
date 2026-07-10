@@ -138,14 +138,14 @@ export default function DashboardPage() {
   if (!mounted) return null;
 
   return (
-    <div className="p-6 max-w-[1400px] mx-auto">
+    <div className="p-4 sm:p-6 max-w-[1400px] mx-auto space-y-6">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
         className="mb-6"
       >
-        <div className="flex items-start justify-between">
+        <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
           <div>
             <h1 className="text-xl font-semibold text-foreground">
               Bom dia, {user?.name ? user.name.split(" ")[0] : "Estudante"} 👋
@@ -162,16 +162,16 @@ export default function DashboardPage() {
               </span>
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-muted border border-border">
+          <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+            <div className="flex flex-1 md:flex-none items-center justify-center gap-1.5 px-3 py-2 md:py-1.5 rounded-md bg-muted border border-border">
               <Flame size={14} className="text-muted-foreground" />
               <span className="text-sm font-semibold text-muted-foreground">0 dias</span>
-              <span className="text-xs text-muted-foreground">de sequência</span>
+              <span className="text-xs text-muted-foreground hidden sm:inline">de sequência</span>
             </div>
-            <Link href="/simulados">
-              <Button variant="indigo" size="sm">
-                <Zap size={13} />
-                Iniciar Simulado
+            <Link href="/simulados" className="flex-1 md:flex-none">
+              <Button variant="indigo" size="sm" className="w-full">
+                <Zap size={13} className="mr-1" />
+                Simulado
               </Button>
             </Link>
           </div>
