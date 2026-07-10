@@ -60,7 +60,6 @@ export default function ConcursosPage() {
       const loadingTask = pdfjs.getDocument({
         data: new Uint8Array(arrayBuffer),
         useWorkerFetch: false,
-        isEvalSupported: false,
         useSystemFonts: true,
         disableRange: true,
         disableStream: true,
