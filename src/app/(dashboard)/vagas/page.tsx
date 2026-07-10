@@ -47,9 +47,11 @@ export default function VagasPage() {
                 Enquanto o painel de vagas não chega, certifique-se de que seu currículo ATS-friendly está atualizado para não perder nenhuma oportunidade.
               </p>
             </div>
-            <Button variant="outline" size="sm" className="w-fit gap-2" asChild>
-              <a href="/curriculo">Atualizar Currículo</a>
-            </Button>
+            <a href="/curriculo">
+              <Button variant="outline" size="sm" className="w-fit gap-2">
+                Atualizar Currículo
+              </Button>
+            </a>
           </div>
         </div>
       </div>
