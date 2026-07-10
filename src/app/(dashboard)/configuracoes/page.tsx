@@ -46,7 +46,7 @@ export default function ConfiguracoesPage() {
 
       <div className="grid grid-cols-12 gap-4">
         {/* Sidebar */}
-        <div className="col-span-3">
+        <div className="col-span-12 sm:col-span-12 lg:col-span-6 lg:col-span-3">
           <nav className="space-y-0.5">
             {SECTIONS.map((s) => (
               <button
@@ -65,7 +65,7 @@ export default function ConfiguracoesPage() {
         </div>
 
         {/* Content */}
-        <div className="col-span-9">
+        <div className="col-span-12 lg:col-span-9">
           <motion.div
             key={activeSection}
             initial={{ opacity: 0, y: 4 }}
@@ -90,7 +90,7 @@ export default function ConfiguracoesPage() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Nome</label>
                       <Input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} className="text-sm" />
@@ -127,7 +127,7 @@ export default function ConfiguracoesPage() {
                   <CardTitle className="text-base">Metas de Estudo</CardTitle>
                 </CardHeader>
                 <CardContent className="p-5 space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="text-xs font-medium text-muted-foreground mb-1.5 block">
                         <Clock size={12} className="inline mr-1" />
@@ -185,7 +185,7 @@ export default function ConfiguracoesPage() {
                 <CardContent className="p-5 space-y-4">
                   <div>
                     <label className="text-xs font-medium text-muted-foreground mb-3 block">Tema</label>
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                       {[
                         { id: "dark", label: "Escuro", icon: Moon, desc: "Linear, Vercel aesthetic" },
                         { id: "light", label: "Claro", icon: Sun, desc: "Modo claro limpo" },

@@ -116,7 +116,7 @@ export default function RevisoesPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-3 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
         {[
           { label: "Para hoje", value: today.length, color: today.length > 0 ? "text-red-500" : "text-chart-2" },
           { label: "Esta semana", value: revisions.filter((r) => !r.completedAt && getDaysFromNow(r.scheduledAt) <= 7 && getDaysFromNow(r.scheduledAt) > 0).length, color: "text-amber-500" },
@@ -152,7 +152,7 @@ export default function RevisoesPage() {
 
       <div className="grid grid-cols-12 gap-4">
         {/* Today's revisions */}
-        <div className="col-span-7">
+        <div className="col-span-12 lg:col-span-7">
           <h2 className="text-sm font-semibold mb-3 flex items-center gap-2">
             <AlertCircle size={13} className="text-red-500" />
             Para revisar hoje ({today.length})
@@ -252,7 +252,7 @@ export default function RevisoesPage() {
         </div>
 
         {/* Sidebar */}
-        <div className="col-span-5 space-y-4">
+        <div className="col-span-12 lg:col-span-5 space-y-4">
           {/* Completion rate */}
           <Card>
             <CardHeader className="p-4 pb-2">

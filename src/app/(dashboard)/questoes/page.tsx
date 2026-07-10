@@ -356,7 +356,7 @@ export default function QuestoesPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-3 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
         {[
           { label: "Respondidas", value: totalAnswered, color: "text-chart-1" },
           { label: "Corretas", value: totalCorrect, color: "text-chart-2" },

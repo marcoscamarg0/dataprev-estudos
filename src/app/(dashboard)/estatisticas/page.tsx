@@ -98,7 +98,7 @@ export default function EstatisticasPage() {
           { label: "Horas Estudadas", value: "0h", delta: "0h hoje", up: true, icon: Clock },
           { label: "Prob. Aprovação", value: `0%`, delta: "iniciando", up: true, icon: Brain },
         ].map((s) => (
-          <motion.div key={s.label} variants={item} className="col-span-3">
+          <motion.div key={s.label} variants={item} className="col-span-12 sm:col-span-12 lg:col-span-6 lg:col-span-3">
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-start justify-between mb-2">
@@ -121,7 +121,7 @@ export default function EstatisticasPage() {
         ))}
 
         {/* Radar + Pie */}
-        <motion.div variants={item} className="col-span-5">
+        <motion.div variants={item} className="col-span-12 lg:col-span-5">
           <Card className="h-full">
             <CardHeader className="p-4 pb-0">
               <CardTitle className="text-sm">Radar de Desempenho por Área</CardTitle>
@@ -147,7 +147,7 @@ export default function EstatisticasPage() {
           </Card>
         </motion.div>
 
-        <motion.div variants={item} className="col-span-3">
+        <motion.div variants={item} className="col-span-12 sm:col-span-12 lg:col-span-6 lg:col-span-3">
           <Card className="h-full">
             <CardHeader className="p-4 pb-0">
               <CardTitle className="text-sm">Distribuição de Respostas</CardTitle>
@@ -194,7 +194,7 @@ export default function EstatisticasPage() {
         </motion.div>
 
         {/* Weak subjects diagnostic */}
-        <motion.div variants={item} className="col-span-4">
+        <motion.div variants={item} className="col-span-12 lg:col-span-4">
           <Card className="h-full">
             <CardHeader className="p-4 pb-0">
               <div className="flex items-center justify-between">
@@ -239,7 +239,7 @@ export default function EstatisticasPage() {
         </motion.div>
 
         {/* Monthly evolution */}
-        <motion.div variants={item} className="col-span-8">
+        <motion.div variants={item} className="col-span-12 lg:col-span-8">
           <Card>
             <CardHeader className="p-4 pb-0">
               <div className="flex items-center justify-between">
@@ -297,7 +297,7 @@ export default function EstatisticasPage() {
         </motion.div>
 
         {/* Bar chart by subject */}
-        <motion.div variants={item} className="col-span-4">
+        <motion.div variants={item} className="col-span-12 lg:col-span-4">
           <Card>
             <CardHeader className="p-4 pb-0">
               <CardTitle className="text-sm">Acerto por Disciplina</CardTitle>
@@ -347,13 +347,13 @@ export default function EstatisticasPage() {
         </motion.div>
 
         {/* Projection */}
-        <motion.div variants={item} className="col-span-8">
+        <motion.div variants={item} className="col-span-12 lg:col-span-8">
           <Card>
             <CardHeader className="p-4 pb-0">
               <CardTitle className="text-sm">Projeção até a Prova</CardTitle>
             </CardHeader>
             <CardContent className="p-4">
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {[
                   { label: "Questões projetadas", value: "0", sub: "até o dia da prova", color: "text-chart-1" },
                   { label: "Taxa de acerto projetada", value: "0%", sub: "se mantiver ritmo atual", color: "text-chart-2" },

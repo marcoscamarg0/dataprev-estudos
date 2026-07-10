@@ -252,7 +252,7 @@ export default function SimuladosPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-3 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
         {[
           { label: "Simulados feitos", value: "0", icon: "📋", color: "text-foreground" },
           { label: "Média de pontuação", value: "0%", icon: "📊", color: "text-chart-2" },
@@ -273,9 +273,9 @@ export default function SimuladosPage() {
 
       <div className="grid grid-cols-12 gap-4">
         {/* Exam types */}
-        <div className="col-span-7">
+        <div className="col-span-12 lg:col-span-7">
           <h2 className="text-sm font-semibold mb-3">Iniciar Simulado</h2>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {SIMULADO_TYPES.map((type) => (
               <motion.div
                 key={type.id}
@@ -341,7 +341,7 @@ export default function SimuladosPage() {
         </div>
 
         {/* Recent results */}
-        <div className="col-span-5">
+        <div className="col-span-12 lg:col-span-5">
           <h2 className="text-sm font-semibold mb-3">Resultados Recentes</h2>
           <div className="space-y-3">
             {MOCK_RESULTS.length === 0 && (

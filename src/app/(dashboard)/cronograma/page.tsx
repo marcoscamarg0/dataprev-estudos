@@ -117,7 +117,7 @@ export default function CronogramaPage() {
 
       <div className="grid grid-cols-12 gap-4">
         {/* Left: Schedule */}
-        <div className="col-span-8">
+        <div className="col-span-12 lg:col-span-8">
           {/* View toggle */}
           <div className="flex gap-1 mb-4 p-1 bg-muted rounded-md w-fit">
             {(["hoje", "semana", "mes"] as const).map((v) => (
@@ -204,7 +204,7 @@ export default function CronogramaPage() {
           )}
 
           {view === "semana" && (
-            <div className="grid grid-cols-7 gap-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
               {WEEK_SUMMARY.map((day) => (
                 <Card
                   key={day.day}
@@ -247,7 +247,7 @@ export default function CronogramaPage() {
         </div>
 
         {/* Right: Stats & Plan */}
-        <div className="col-span-4 space-y-4">
+        <div className="col-span-12 lg:col-span-4 space-y-4">
           {/* Daily progress */}
           <Card>
             <CardHeader className="p-4 pb-2">
@@ -259,7 +259,7 @@ export default function CronogramaPage() {
                 <span className="text-xs text-muted-foreground mb-1">de {formatMinutes(todayTotal)}</span>
               </div>
               <Progress value={(150 / todayTotal) * 100} />
-              <div className="grid grid-cols-2 gap-2 mt-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-3">
                 {[
                   { label: "Concluídas", value: "2", color: "text-chart-2" },
                   { label: "Pendentes", value: `${SCHEDULE_TODAY.length - 2}`, color: "text-amber-500" },

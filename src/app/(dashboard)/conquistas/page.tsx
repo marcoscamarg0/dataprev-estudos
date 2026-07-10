@@ -198,7 +198,7 @@ export default function ConquistasPage() {
 
       <div className="grid grid-cols-12 gap-4">
         {/* XP Card */}
-        <div className="col-span-4">
+        <div className="col-span-12 lg:col-span-4">
           <Card className="border-chart-5/20 bg-chart-5/5">
             <CardContent className="p-5">
               <div className="flex items-center justify-between mb-4">
@@ -281,7 +281,7 @@ export default function ConquistasPage() {
         </div>
 
         {/* Right: Missions + Achievements */}
-        <div className="col-span-8 space-y-4">
+        <div className="col-span-12 lg:col-span-8 space-y-4">
           {/* Weekly missions */}
           <Card>
             <CardHeader className="p-4 pb-2">
@@ -355,7 +355,7 @@ export default function ConquistasPage() {
                 ))}
               </div>
             </div>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
               {filtered.map((achievement) => (
                 <motion.div
                   key={achievement.id}

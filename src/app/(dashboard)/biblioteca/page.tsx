@@ -107,7 +107,7 @@ export default function BibliotecaPage() {
       </div>
 
       {/* Type stats */}
-      <div className="grid grid-cols-4 gap-3 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
         {(Object.entries(TYPE_CONFIG) as [ItemType, (typeof TYPE_CONFIG)[ItemType]][]).map(
           ([type, config]) => {
             const count = items.filter((i) => i.type === type).length;
@@ -159,7 +159,7 @@ export default function BibliotecaPage() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {filtered.map((item) => {
             const config = TYPE_CONFIG[item.type] ?? TYPE_CONFIG.note;
             return (

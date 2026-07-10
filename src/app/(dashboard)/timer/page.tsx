@@ -125,7 +125,7 @@ export default function TimerPage() {
 
       <div className="grid grid-cols-12 gap-4">
         {/* Timer main */}
-        <div className="col-span-5">
+        <div className="col-span-12 lg:col-span-5">
           <Card className="h-full">
             <CardContent className="p-6">
               {/* Mode selector */}
@@ -212,7 +212,7 @@ export default function TimerPage() {
 
                 {/* Pomodoro phases */}
                 {mode === "pomodoro" && (
-                  <div className="grid grid-cols-3 gap-2 w-full mb-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 w-full mb-4">
                     {[
                       { phase: "work", label: "Foco", duration: "25min", icon: "🎯" },
                       { phase: "break", label: "Pausa", duration: "5min", icon: "☕" },
@@ -255,7 +255,7 @@ export default function TimerPage() {
         </div>
 
         {/* Right column */}
-        <div className="col-span-7 space-y-4">
+        <div className="col-span-12 lg:col-span-7 space-y-4">
           {/* Topic selector */}
           <Card>
             <CardContent className="p-4">
@@ -331,7 +331,7 @@ export default function TimerPage() {
               <CardTitle className="text-sm">Hoje</CardTitle>
             </CardHeader>
             <CardContent className="p-4 pt-2">
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {[
                   { label: "Tempo total", value: formatMinutes(totalTodayMinutes), icon: Clock },
                   { label: "Sessões", value: history.filter((s) => {

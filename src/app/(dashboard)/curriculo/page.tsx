@@ -717,7 +717,7 @@ export default function CurriculoPage() {
                   subtitle="Informações de contato que aparecerão no topo do currículo"
                 />
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="sm:col-span-2">
+                  <div className="sm:col-span-12 sm:col-span-6 lg:col-span-2">
                     <FieldLabel>Nome Completo *</FieldLabel>
                     <Input
                       value={profile.name}
@@ -758,7 +758,7 @@ export default function CurriculoPage() {
                       placeholder="github.com/joaosilva"
                     />
                   </div>
-                  <div className="sm:col-span-2">
+                  <div className="sm:col-span-12 sm:col-span-6 lg:col-span-2">
                     <FieldLabel>Cargo Desejado / Objetivo</FieldLabel>
                     <Input
                       value={profile.targetRole}
@@ -766,7 +766,7 @@ export default function CurriculoPage() {
                       placeholder="Ex: Desenvolvedor Java Sênior | Analista de Sistemas"
                     />
                   </div>
-                  <div className="sm:col-span-2">
+                  <div className="sm:col-span-12 sm:col-span-6 lg:col-span-2">
                     <FieldLabel>Resumo Profissional (base)</FieldLabel>
                     <Textarea
                       value={profile.summary}
@@ -821,7 +821,7 @@ export default function CurriculoPage() {
                             placeholder="Desenvolvedor Java Pleno"
                           />
                         </div>
-                        <div className="sm:col-span-2">
+                        <div className="sm:col-span-12 sm:col-span-6 lg:col-span-2">
                           <FieldLabel>Período</FieldLabel>
                           <Input
                             value={exp.period}
@@ -829,7 +829,7 @@ export default function CurriculoPage() {
                             placeholder="Jan/2022 – Presente"
                           />
                         </div>
-                        <div className="sm:col-span-2">
+                        <div className="sm:col-span-12 sm:col-span-6 lg:col-span-2">
                           <FieldLabel>Conquistas e Responsabilidades</FieldLabel>
                           <Textarea
                             value={exp.description}
@@ -1133,7 +1133,7 @@ export default function CurriculoPage() {
                   <User size={14} className="text-muted-foreground" />
                   <span className="text-sm font-semibold">Status do Perfil</span>
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 sm:grid-cols-4 gap-2">
                   {[
                     { label: "Dados pessoais", ok: !!profile.name },
                     { label: "Experiências", ok: profile.experiences.length > 0 },

@@ -172,7 +172,7 @@ export default function FlashcardsPage() {
               <p className="text-xs text-center text-muted-foreground mb-3">
                 Como foi sua resposta?
               </p>
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
                 {[
                   { quality: 1, label: "Errei", color: "bg-red-500/10 text-red-500 border-red-500/20 hover:bg-red-500/20", next: "1 dia" },
                   { quality: 2, label: "Difícil", color: "bg-amber-500/10 text-amber-500 border-amber-500/20 hover:bg-amber-500/20", next: "3 dias" },
@@ -291,7 +291,7 @@ export default function FlashcardsPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-3 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
         {[
           { label: "Total de cards", value: flashcards.length, color: "text-foreground" },
           { label: "Para revisar hoje", value: dueToday.length, color: "text-red-500" },
@@ -338,9 +338,9 @@ export default function FlashcardsPage() {
       </div>
 
       {/* Cards grid */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {filteredCards.length === 0 && (
-          <div className="col-span-2 text-center py-12 text-muted-foreground">
+          <div className="col-span-12 sm:col-span-6 lg:col-span-2 text-center py-12 text-muted-foreground">
             <BookOpen size={32} className="mx-auto mb-4 opacity-50" />
             <p className="text-sm">Nenhum flashcard disponível ainda.</p>
           </div>
