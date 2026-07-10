@@ -178,14 +178,33 @@ export default function CurriculoPage() {
   const [newSkill, setNewSkill] = useState("");
   const pdfInputRef = useRef<HTMLInputElement>(null);
 
-  // Load from localStorage on mount
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Load from Database on mount
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        setProfile(JSON.parse(stored));
+    async function loadProfile() {
+      try {
+        const res = await fetch("/api/profile");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.profile) {
+            // Restore JSON arrays correctly or fallback
+            setProfile({
+              ...DEFAULT_PROFILE,
+              ...data.profile,
+            });
+          }
+        } else {
+          // Fallback to local if first time or error
+          const stored = localStorage.getItem(STORAGE_KEY);
+          if (stored) setProfile(JSON.parse(stored));
+        }
+      } catch (e) {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) setProfile(JSON.parse(stored));
       }
-    } catch {}
+    }
+    loadProfile();
   }, []);
 
   // ── LinkedIn PDF Import ──
@@ -259,18 +278,21 @@ export default function CurriculoPage() {
           ...prev,
           ...data.profile,
           name: data.profile.name || prev.name,
-          email: data.profile.email || prev.email,
-          phone: data.profile.phone || prev.phone,
-          linkedin: data.profile.linkedin || prev.linkedin,
-          github: data.profile.github || prev.github,
-          targetRole: data.profile.targetRole || prev.targetRole,
-          summary: data.profile.summary || prev.summary,
-        }));
-        setImportSuccess(true);
-        try {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...profile, ...data.profile }));
-        } catch {}
-        setTimeout(() => setImportSuccess(false), 5000);
+        if (data.profile) {
+          const newProfile = { ...profile, ...data.profile };
+          setProfile(newProfile);
+          setImportSuccess(true);
+          try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(newProfile));
+            // Save to DB
+            fetch("/api/profile", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(newProfile)
+            });
+          } catch {}
+          setTimeout(() => setImportSuccess(false), 5000);
+        }
       }
     } catch {
       setImportError("Falha de rede. Verifique sua conexão.");
@@ -281,12 +303,26 @@ export default function CurriculoPage() {
   };
 
 
-  const saveProfile = () => {
+  const saveProfile = async () => {
+    setIsSaving(true);
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(profile));
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2000);
-    } catch {}
+      
+      const res = await fetch("/api/profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(profile)
+      });
+      
+      if (res.ok) {
+        setSaved(true);
+        setTimeout(() => setSaved(false), 2000);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const updateField = <K extends keyof Profile>(key: K, value: Profile[K]) => {

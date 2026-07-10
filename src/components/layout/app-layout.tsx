@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { useUIStore, useAuthStore } from "@/store";
+import { useUIStore, useAuthStore, useCurriculumStore } from "@/store";
 import { cn, getDaysUntil, EXAM_DATE } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -254,9 +254,14 @@ export function AppLayout({ children }: AppLayoutProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const daysLeft = getDaysUntil(EXAM_DATE);
 
+  const { fetchEditais } = useCurriculumStore();
+
   const isEffectivelyCollapsed = sidebarCollapsed && !isHovered;
 
-  useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    setMounted(true);
+    fetchEditais();
+  }, []);
 
   // Close mobile drawer on route change
   useEffect(() => {
