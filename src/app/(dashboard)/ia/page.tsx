@@ -171,10 +171,10 @@ export default function IAPage() {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-56px)]">
-      <div className="flex flex-1 min-h-0">
+    <div className="flex flex-col h-[calc(100vh-7rem)] md:h-[calc(100vh-3.5rem)]">
+      <div className="flex flex-col md:flex-row flex-1 min-h-0">
         {/* Sidebar */}
-        <div className="w-64 border-r border-border p-4 flex flex-col gap-4 shrink-0 overflow-y-auto">
+        <div className="hidden md:flex w-64 border-r border-border p-4 flex-col gap-4 shrink-0 overflow-y-auto">
           <div>
             <div className="flex items-center gap-2 mb-3">
               <Sparkles size={13} className="text-chart-1" />
@@ -232,9 +232,9 @@ export default function IAPage() {
         </div>
 
         {/* Chat area */}
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex-1 flex flex-col min-w-0 h-full">
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-4">
+          <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 pb-20 md:pb-6">
             <AnimatePresence initial={false}>
               {messages.map((message) => (
                 <motion.div
@@ -242,14 +242,14 @@ export default function IAPage() {
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
                   className={cn(
-                    "flex gap-3",
+                    "flex gap-2 md:gap-3",
                     message.role === "user" && "flex-row-reverse"
                   )}
                 >
                   {/* Avatar */}
                   <div
                     className={cn(
-                      "w-7 h-7 rounded-full flex items-center justify-center shrink-0",
+                      "w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center shrink-0 mt-1 md:mt-0",
                       message.role === "assistant"
                         ? "bg-chart-1/20 text-chart-1"
                         : "bg-muted text-foreground"
@@ -265,7 +265,7 @@ export default function IAPage() {
                   {/* Bubble */}
                   <div
                     className={cn(
-                      "max-w-[80%] rounded-xl p-4 text-sm leading-relaxed",
+                      "max-w-[85%] md:max-w-[80%] rounded-xl p-3 md:p-4 text-xs md:text-sm leading-relaxed",
                       message.role === "assistant"
                         ? "bg-card border border-border"
                         : "bg-chart-1/10 border border-chart-1/20"
@@ -323,7 +323,7 @@ export default function IAPage() {
           </div>
 
           {/* Input area */}
-          <div className="border-t border-border p-4">
+          <div className="border-t border-border p-3 md:p-4 bg-background z-10 shrink-0">
             <div className="flex gap-2 max-w-4xl mx-auto">
               <div className="flex-1 relative">
                 <Input
