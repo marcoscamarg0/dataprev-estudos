@@ -4,19 +4,21 @@ import { getUserFromRequest } from "@/lib/auth";
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const payload = getUserFromRequest(request);
   if (!payload) {
     return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
   }
 
+  const { id } = await params;
+
   try {
     const data = await request.json();
 
     const updatedEdital = await prisma.userEdital.update({
       where: { 
-        id: params.id,
+        id,
         userId: payload.userId, // Ensures user can only update their own
       },
       data: {
@@ -36,17 +38,19 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const payload = getUserFromRequest(request);
   if (!payload) {
     return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
   }
 
+  const { id } = await params;
+
   try {
     await prisma.userEdital.delete({
       where: { 
-        id: params.id,
+        id,
         userId: payload.userId,
       },
     });

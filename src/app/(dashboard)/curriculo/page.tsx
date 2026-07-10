@@ -274,10 +274,6 @@ export default function CurriculoPage() {
       if (!response.ok) {
         setImportError(data.error || "Erro ao processar com IA.");
       } else {
-        setProfile((prev) => ({
-          ...prev,
-          ...data.profile,
-          name: data.profile.name || prev.name,
         if (data.profile) {
           const newProfile = { ...profile, ...data.profile };
           setProfile(newProfile);
