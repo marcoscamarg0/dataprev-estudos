@@ -283,11 +283,11 @@ export function AppLayout({ children }: AppLayoutProps) {
       <AnimatePresence>
         {mobileOpen && (
           <motion.aside
-            initial={{ x: -280 }}
+            initial={{ x: 280 }}
             animate={{ x: 0 }}
-            exit={{ x: -280 }}
+            exit={{ x: 280 }}
             transition={{ type: "spring", damping: 28, stiffness: 300 }}
-            className="fixed top-0 left-0 h-full w-[280px] flex flex-col border-r border-border bg-sidebar z-40 md:hidden overflow-hidden"
+            className="fixed top-0 right-0 h-full w-[280px] flex flex-col border-l border-border bg-background z-50 md:hidden overflow-hidden shadow-2xl"
           >
             {/* Close button */}
             <button
@@ -473,7 +473,7 @@ export function AppLayout({ children }: AppLayoutProps) {
       </div>
 
       {/* ── Mobile Bottom Navigation ── */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-background/80 backdrop-blur-xl" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-background" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
         <div className="flex items-center justify-around h-14 px-1">
           <Link href="/dashboard" className={cn("flex flex-col items-center justify-center w-full h-full space-y-1 text-muted-foreground hover:text-foreground transition-colors", pathname === "/dashboard" && "text-foreground")}>
             <LayoutDashboard size={20} className={pathname === "/dashboard" ? "text-indigo-500" : ""} />
