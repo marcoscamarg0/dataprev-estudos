@@ -73,6 +73,7 @@ export async function POST(req: NextRequest) {
       systemInstruction: PARSE_EDITAL_PROMPT(role || ""),
       prompt: text,
       temperature: 0.1,
+      maxOutputTokens: 8192,
     });
 
     return NextResponse.json(parsedData);

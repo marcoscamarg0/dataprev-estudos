@@ -51,6 +51,7 @@ Formato JSON EXIGIDO:
     const parsedData = await callGeminiJson<{ questions?: any[] } | any[]>({
       prompt,
       temperature: 0.7,
+      maxOutputTokens: 8192,
     });
 
     if (Array.isArray(parsedData)) {

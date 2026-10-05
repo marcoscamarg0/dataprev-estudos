@@ -79,6 +79,7 @@ export async function POST(request: NextRequest) {
       systemInstruction: PARSE_SYSTEM_PROMPT,
       prompt: `Extraia as informações do seguinte texto de perfil LinkedIn e retorne o JSON estruturado:\n\n${text}`,
       temperature: 0.1,
+      maxOutputTokens: 8192,
     });
 
     console.log("✅ [LinkedIn Parser] Gemini retornou dados. Estruturando IDs...");
