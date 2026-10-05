@@ -27,7 +27,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
-import { useActiveCurriculum, useActiveEditalTitle } from "@/store/curriculumStore";
+import { useActiveCurriculum, useActiveEditalTitle, useActiveEdital, useActiveEditalBanca } from "@/store/curriculumStore";
 
 type FilterState = {
   subject: string;
@@ -57,6 +57,8 @@ export default function QuestoesPage() {
 
   const activeCurriculum = useActiveCurriculum();
   const activeTitle = useActiveEditalTitle();
+  const activeEdital = useActiveEdital();
+  const activeBanca = useActiveEditalBanca();
 
   const generateQuestions = async () => {
     setIsGenerating(true);
@@ -70,6 +72,8 @@ export default function QuestoesPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           editalTitle: activeTitle,
+          role: activeEdital.role,
+          banca: activeBanca,
           subjects: selectedSubjects,
           count: 3 // Generate 3 questions for quick study session (to prevent API timeouts)
         }),
@@ -204,8 +208,10 @@ export default function QuestoesPage() {
             <Card className="mb-4">
               <CardContent className="p-5">
                 <div className="flex items-center gap-2 mb-4">
-                  <Badge variant="outline" className="text-[10px]">{currentQuestion.banca}</Badge>
-                  <Badge variant="outline" className="text-[10px]">{currentQuestion.year}</Badge>
+                  <Badge variant="outline" className="text-[10px] font-bold border-amber-500/40 text-amber-400 bg-amber-500/10">
+                    Banca {currentQuestion.banca || activeBanca}
+                  </Badge>
+                  <Badge variant="outline" className="text-[10px]">{currentQuestion.year || 2026}</Badge>
                   <Badge
                     className={cn(
                       "text-[10px]",
@@ -344,14 +350,19 @@ export default function QuestoesPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-xl font-semibold">Questões</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl font-semibold">Questões</h1>
+            <Badge variant="outline" className="text-xs font-semibold border-amber-500/40 text-amber-400 bg-amber-500/10">
+              🏛️ Banca Oficial: {activeBanca}
+            </Badge>
+          </div>
           <p className="text-sm text-muted-foreground mt-0.5">
             Treine com questões baseadas no edital: <strong className="font-medium text-foreground">{activeTitle}</strong>
           </p>
         </div>
         <Button onClick={generateQuestions} disabled={isGenerating} className="bg-indigo-600 hover:bg-indigo-700">
           <Bot className="mr-2" size={16} />
-          {isGenerating ? "Gerando Bateria..." : "Gerar Bateria com IA"}
+          {isGenerating ? `Gerando Questões ${activeBanca}...` : `Gerar Questões ${activeBanca} (IA)`}
         </Button>
       </div>
 

@@ -5,7 +5,8 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useUIStore, useAuthStore } from "@/store";
-import { useCurriculumStore } from "@/store/curriculumStore";
+import { useCurriculumStore, useActiveEdital } from "@/store/curriculumStore";
+import { ConcursoSelector } from "./concurso-selector";
 import { cn, getDaysUntil, EXAM_DATE } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -101,6 +102,7 @@ function SidebarContent({
 }) {
   const router = useRouter();
   const { logout } = useAuthStore();
+  const activeEdital = useActiveEdital();
 
   return (
     <>
@@ -192,22 +194,31 @@ function SidebarContent({
         ))}
       </div>
 
-      {/* Exam countdown */}
+      {/* Concurso em Foco / Active Edital */}
       <AnimatePresence>
         {!isEffectivelyCollapsed && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="mx-2 mb-2 p-3 rounded-md bg-chart-1/10 border border-chart-1/20"
+            className="mx-2 mb-2 p-2.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20"
           >
-            <p className="text-[10px] font-medium text-chart-1 mb-1">
-              PROVA EM
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-[10px] font-mono font-medium text-indigo-400 uppercase tracking-wide">
+                Concurso em Foco
+              </span>
+              <Link href="/concursos" onClick={onItemClick}>
+                <span className="text-[10px] text-zinc-400 hover:text-white underline cursor-pointer">
+                  Mudar
+                </span>
+              </Link>
+            </div>
+            <p className="text-xs font-bold text-white truncate leading-tight">
+              {activeEdital?.title}
             </p>
-            <p className="text-2xl font-bold text-foreground leading-none">
-              {daysLeft}
+            <p className="text-[10px] text-zinc-400 truncate mt-0.5">
+              {activeEdital?.role || "Geral"} · {activeEdital?.curriculum?.length || 0} matérias
             </p>
-            <p className="text-[10px] text-muted-foreground">dias restantes</p>
           </motion.div>
         )}
       </AnimatePresence>
@@ -393,15 +404,26 @@ export function AppLayout({ children }: AppLayoutProps) {
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
         <header className="flex items-center justify-between h-14 px-3 sm:px-4 border-b border-border bg-background shrink-0 z-10">
           <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+            {/* Mobile menu trigger */}
+            <button
+              onClick={() => setMobileOpen(true)}
+              className="p-1.5 rounded-md hover:bg-muted md:hidden text-muted-foreground shrink-0"
+              title="Abrir menu"
+            >
+              <Menu size={18} />
+            </button>
+
+            {/* Global Concurso Selector */}
+            <ConcursoSelector className="shrink-0" />
+
             {/* Search */}
             <button
               onClick={() => setGlobalSearchOpen(true)}
-              className="flex items-center gap-2 px-3 h-8 rounded-md border border-border bg-muted/50 text-muted-foreground text-sm hover:bg-muted hover:text-foreground transition-colors w-full max-w-[180px] sm:max-w-sm"
+              className="hidden md:flex items-center gap-2 px-3 h-8 rounded-md border border-border bg-muted/50 text-muted-foreground text-sm hover:bg-muted hover:text-foreground transition-colors w-full max-w-xs"
             >
               <Search size={13} />
-              <span className="flex-1 text-left text-xs hidden sm:block">Pesquisar tudo...</span>
-              <span className="flex-1 text-left text-xs sm:hidden">Buscar...</span>
-              <kbd className="text-[10px] bg-background border border-border rounded px-1 hidden sm:block">
+              <span className="flex-1 text-left text-xs">Pesquisar tudo...</span>
+              <kbd className="text-[10px] bg-background border border-border rounded px-1">
                 ⌘K
               </kbd>
             </button>

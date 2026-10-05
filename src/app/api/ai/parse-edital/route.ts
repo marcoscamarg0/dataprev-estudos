@@ -12,7 +12,8 @@ O texto fornecido é o "Conteúdo Programático" de um edital.`;
   prompt += `\n\nSua resposta DEVE ser APENAS um objeto JSON válido no seguinte formato:
 
 {
-  "overview": "Resumo detalhado e mastigado sobre a vaga, estilo da prova, requisitos básicos e dicas de estudo baseadas no edital.",
+  "banca": "Nome da Banca Examinadora detectada no edital (ex: FGV, Cebraspe, FCC, Cesgranrio, Vunesp, etc. Se não encontrar menção explícita, deduza ou use 'FGV')",
+  "overview": "Resumo detalhado e mastigado sobre a vaga, estilo da prova e da banca, requisitos básicos e dicas de estudo baseadas no edital.",
   "curriculum": [
     {
       "name": "Nome da Disciplina (ex: Língua Portuguesa)",

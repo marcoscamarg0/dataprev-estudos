@@ -46,6 +46,7 @@ export default function ConcursosPage() {
 
   const [title, setTitle] = useState("");
   const [role, setRole] = useState("");
+  const [banca, setBanca] = useState("FGV");
   const [text, setText] = useState("");
 
   const [isLoading, setIsLoading] = useState(false);
@@ -57,6 +58,7 @@ export default function ConcursosPage() {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [isConsoleOpen, setIsConsoleOpen] = useState(true);
   const [isTestingApi, setIsTestingApi] = useState(false);
+  const [generatingMaterialsId, setGeneratingMaterialsId] = useState<string | null>(null);
   const [copiedLogs, setCopiedLogs] = useState(false);
   const [cmdInput, setCmdInput] = useState("");
   const consoleEndRef = useRef<HTMLDivElement>(null);
@@ -111,6 +113,7 @@ export default function ConcursosPage() {
     setEditingId(null);
     setTitle("");
     setRole("");
+    setBanca("FGV");
     setText("");
     setError("");
     addLog("info", "Formulário de edital fechado.");
@@ -119,10 +122,11 @@ export default function ConcursosPage() {
   const startEditing = (edital: any) => {
     setTitle(edital.title);
     setRole(edital.role || "");
+    setBanca(edital.banca || "FGV");
     setText("");
     setEditingId(edital.id);
     setIsAdding(true);
-    addLog("info", `Modo de edição aberto para: "${edital.title}" (ID: ${edital.id})`);
+    addLog("info", `Modo de edição aberto para: "${edital.title}" (ID: ${edital.id}, Banca: ${edital.banca || "FGV"})`);
   };
 
   const handlePdfUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -209,29 +213,66 @@ export default function ConcursosPage() {
 
         newCurriculum = data.curriculum;
         newOverview = data.overview;
+        const detectedBanca = data.banca || banca || "FGV";
+        if (data.banca) {
+          setBanca(data.banca);
+          addLog("info", `[IA] Banca examinadora identificada no edital: "${data.banca}"`);
+        }
 
         addLog("success", `[IA] Extração concluída com sucesso! ${newCurriculum?.length || 0} disciplinas estruturadas.`);
-      }
 
-      if (editingId) {
-        const updates: any = { title, role };
-        if (newCurriculum) {
-          updates.curriculum = newCurriculum;
-          updates.overview = newOverview;
+        // Gerar materiais de estudo automaticamente com IA calibrados para a banca
+        let generatedMaterials = undefined;
+        try {
+          addLog("gemini", `[IA] Gerando materiais de estudo calibrados para a banca "${detectedBanca}" e cargo: "${role}"...`);
+          const matRes = await fetch("/api/ai/generate-study-materials", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              editalTitle: title,
+              role,
+              banca: detectedBanca,
+              subjects: newCurriculum,
+            }),
+          });
+          if (matRes.ok) {
+            const matData = await matRes.json();
+            if (matData.materials) {
+              generatedMaterials = matData.materials;
+              addLog("success", `[IA] Materiais de estudo criados: ${generatedMaterials.summaries?.length || 0} resumos teóricos focados na banca ${detectedBanca}, ${generatedMaterials.flashcards?.length || 0} flashcards e cronograma semanal!`);
+            }
+          }
+        } catch (matErr: any) {
+          addLog("warn", `[IA] Nota sobre materiais: ${matErr.message || "Apostilas poderão ser geradas no dashboard."}`);
         }
-        updateEdital(editingId, updates);
-        addLog("success", `Edital "${title}" atualizado com sucesso no banco de dados!`);
+
+        if (editingId) {
+          const updates: any = { title, role, banca: detectedBanca };
+          if (newCurriculum) {
+            updates.curriculum = newCurriculum;
+            updates.overview = newOverview;
+          }
+          if (generatedMaterials) {
+            updates.studyMaterials = generatedMaterials;
+          }
+          updateEdital(editingId, updates);
+          addLog("success", `Edital "${title}" (Banca: ${detectedBanca}) atualizado com sucesso no banco de dados!`);
+        } else {
+          addEdital({
+            title,
+            role,
+            banca: detectedBanca,
+            overview: newOverview,
+            curriculum: newCurriculum,
+            studyMaterials: generatedMaterials,
+          });
+          addLog("success", `🎉 Novo edital "${title}" (Banca: ${detectedBanca}) ativado! O Dashboard já foi atualizado com seus novos materiais de estudo.`);
+        }
+      } else if (editingId) {
+        updateEdital(editingId, { title, role, banca });
+        addLog("success", `Edital "${title}" atualizado (Banca: ${banca}).`);
       } else {
-        if (!newCurriculum) {
-          throw new Error("Você precisa colar o texto do edital ou enviar o PDF para gerar o conteúdo de estudos.");
-        }
-        addEdital({
-          title,
-          role,
-          overview: newOverview,
-          curriculum: newCurriculum,
-        });
-        addLog("success", `Novo edital "${title}" salvo e ativado para seus estudos!`);
+        throw new Error("Você precisa colar o texto do edital ou enviar o PDF para extrair as disciplinas e gerar os materiais de estudo.");
       }
 
       resetForm();
@@ -272,6 +313,33 @@ export default function ConcursosPage() {
       addLog("error", `Erro de rede ao conectar com /api/ai/test: ${err.message}`);
     } finally {
       setIsTestingApi(false);
+    }
+  };
+
+  const handleGenerateMaterialsForEdital = async (edital: any) => {
+    if (generatingMaterialsId) return;
+    setGeneratingMaterialsId(edital.id);
+    const edBanca = edital.banca || "FGV";
+    addLog("gemini", `[IA] Gerando novo pacote de materiais de estudo calibrados para a banca "${edBanca}" ("${edital.title}")...`);
+    try {
+      const res = await fetch("/api/ai/generate-study-materials", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          editalTitle: edital.title,
+          role: edital.role,
+          banca: edBanca,
+          subjects: edital.curriculum,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Erro ao gerar materiais");
+      updateEdital(edital.id, { studyMaterials: data.materials });
+      addLog("success", `[IA] Sucesso! ${data.materials.summaries?.length || 0} resumos e ${data.materials.flashcards?.length || 0} flashcards gerados especificamente para a banca ${edBanca}.`);
+    } catch (err: any) {
+      addLog("error", `Falha ao gerar materiais: ${err.message}`);
+    } finally {
+      setGeneratingMaterialsId(null);
     }
   };
 
@@ -395,7 +463,7 @@ export default function ConcursosPage() {
                     {editingId ? "Editar Edital" : "Adicionar Novo Edital"}
                   </h3>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Nome do Concurso/Órgão</label>
                       <Input
@@ -406,13 +474,42 @@ export default function ConcursosPage() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-indigo-500">Cargo Desejado (Crucial para a IA)</label>
+                      <label className="text-sm font-medium text-indigo-400">Cargo Desejado</label>
                       <Input
                         placeholder="Ex: Agente de Tecnologia"
                         value={role}
                         onChange={(e) => setRole(e.target.value)}
                         disabled={isLoading}
                       />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-amber-400 flex items-center justify-between">
+                        <span>Banca Examinadora</span>
+                        <span className="text-[10px] text-muted-foreground font-normal">Foco dos Estudos</span>
+                      </label>
+                      <Input
+                        placeholder="Ex: FGV, Cebraspe, FCC..."
+                        value={banca}
+                        onChange={(e) => setBanca(e.target.value)}
+                        disabled={isLoading}
+                      />
+                      <div className="flex flex-wrap gap-1 pt-1">
+                        {["FGV", "Cebraspe", "FCC", "Cesgranrio", "Vunesp"].map((b) => (
+                          <button
+                            key={b}
+                            type="button"
+                            onClick={() => setBanca(b)}
+                            className={cn(
+                              "text-[10px] px-2 py-0.5 rounded border transition-colors",
+                              banca.toUpperCase() === b.toUpperCase()
+                                ? "bg-amber-500/20 border-amber-500/50 text-amber-300 font-semibold"
+                                : "bg-muted/40 border-border text-muted-foreground hover:bg-muted"
+                            )}
+                          >
+                            {b}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
 
@@ -494,7 +591,10 @@ export default function ConcursosPage() {
                       </Badge>
                     )}
                   </div>
-                  <div className="flex items-center gap-2 mt-1">
+                  <div className="flex flex-wrap items-center gap-2 mt-1">
+                    <Badge variant="outline" className="text-xs font-semibold border-amber-500/40 text-amber-400 bg-amber-500/10">
+                      🏛️ Banca: {edital.banca || "FGV"}
+                    </Badge>
                     {edital.role && (
                       <Badge variant="secondary" className="text-xs font-normal bg-muted">
                         Cargo: {edital.role}
@@ -503,10 +603,29 @@ export default function ConcursosPage() {
                     <span className="text-xs text-muted-foreground">
                       {edital.curriculum.length} disciplinas cadastradas
                     </span>
+                    {edital.studyMaterials && (
+                      <Badge variant="outline" className="text-emerald-400 border-emerald-500/30 bg-emerald-500/10 text-[10px] gap-1">
+                        <Sparkles size={10} /> {edital.studyMaterials.summaries?.length || 0} Apostilas · {edital.studyMaterials.flashcards?.length || 0} Flashcards
+                      </Badge>
+                    )}
                   </div>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-1.5 text-xs text-indigo-400 border-indigo-500/30 hover:bg-indigo-500/10"
+                    onClick={() => handleGenerateMaterialsForEdital(edital)}
+                    disabled={generatingMaterialsId === edital.id}
+                  >
+                    {generatingMaterialsId === edital.id ? (
+                      <Loader2 size={13} className="animate-spin text-indigo-400" />
+                    ) : (
+                      <Sparkles size={13} className="text-indigo-400" />
+                    )}
+                    <span>{edital.studyMaterials ? "Atualizar Materiais IA" : "Gerar Materiais IA"}</span>
+                  </Button>
                   {activeEditalId !== edital.id && (
                     <Button
                       variant="outline"

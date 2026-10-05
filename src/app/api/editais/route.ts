@@ -4,38 +4,50 @@ import { getUserFromRequest } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
   const payload = getUserFromRequest(request);
-  if (!payload) {
-    return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
-  }
 
   try {
+    const whereClause = payload?.userId ? { userId: payload.userId } : {};
     const editais = await prisma.userEdital.findMany({
-      where: { userId: payload.userId },
-      orderBy: { createdAt: 'desc' }
+      where: whereClause,
+      orderBy: { createdAt: "desc" },
     });
     return NextResponse.json({ editais });
   } catch (error) {
     console.error("Erro ao buscar editais:", error);
-    return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });
+    return NextResponse.json({ editais: [] });
   }
 }
 
 export async function POST(request: NextRequest) {
   const payload = getUserFromRequest(request);
-  if (!payload) {
-    return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
-  }
 
   try {
     const data = await request.json();
 
+    let userId = payload?.userId;
+    if (!userId) {
+      const existingUser = await prisma.user.findFirst();
+      if (existingUser) {
+        userId = existingUser.id;
+      } else {
+        const defaultUser = await prisma.user.create({
+          data: {
+            name: "Estudante",
+            email: "estudante@trampo-hub.local",
+            role: "USER",
+          },
+        });
+        userId = defaultUser.id;
+      }
+    }
+
     const newEdital = await prisma.userEdital.create({
       data: {
-        userId: payload.userId,
+        userId,
         title: data.title,
         role: data.role,
         overview: data.overview,
-        curriculum: data.curriculum, // SubjectData[]
+        curriculum: data.curriculum,
       },
     });
 

@@ -1,49 +1,56 @@
 import { NextRequest, NextResponse } from "next/server";
 import { callGemini, getGeminiApiKey } from "@/lib/gemini";
 
-const SYSTEM_PROMPT = `Você é um tutor especializado em concursos públicos de TI, com foco no concurso DATAPREV 2026 (Perfil Desenvolvimento de Software) da banca FGV.
+function buildSystemPrompt(editalTitle?: string, role?: string, banca?: string, subjects?: any[]) {
+  const currentBanca = (banca || "FGV").toUpperCase();
+  const currentTitle = editalTitle || "DATAPREV 2026";
+  const currentRole = role || "Desenvolvimento de Software";
 
-Seu objetivo é ajudar o candidato a aprender e dominar os conteúdos do edital:
+  let subjectsSummary = "";
+  if (subjects && subjects.length > 0) {
+    subjectsSummary = subjects
+      .slice(0, 10)
+      .map((s: any) => `- ${s.name}: ${s.topics ? s.topics.map((t: any) => t.name).slice(0, 4).join(", ") : ""}`)
+      .join("\n");
+  }
 
-CONHECIMENTOS GERAIS:
-- Língua Portuguesa: interpretação, gramática, ortografia, redação oficial
-- Raciocínio Lógico: proposições, conjuntos, sequências, probabilidade
-- Legislação: administração pública, Lei 8.112, ética, LGPD
+  let bancaStyle = "";
+  if (currentBanca.includes("FGV")) {
+    bancaStyle = "- Estilo FGV: Cobre cenários práticos e situações-problema do dia a dia, com pegadinhas contextuais e alternativas longas e verossímeis. Explique sempre os 'casos de borda' e os motivos de cada distrator.";
+  } else if (currentBanca.includes("CEBRASPE") || currentBanca.includes("CESPE")) {
+    bancaStyle = "- Estilo Cebraspe: Foco em precisão terminológica, rigor com as normas técnicas (ISO, ITIL, COBIT) e palavras de alerta ('exclusivamente', 'prescinde', 'sempre').";
+  } else if (currentBanca.includes("FCC")) {
+    bancaStyle = "- Estilo FCC: Foco cirúrgico em código (Java, Python, SQL), sintaxe e literalidade de especificações técnicas.";
+  } else if (currentBanca.includes("CESGRANRIO")) {
+    bancaStyle = "- Estilo Cesgranrio: Foco corporativo aplicado a estatais e bancos públicos, modelagem de dados, arquitetura em nuvem e Scrum/Kanban.";
+  } else {
+    bancaStyle = `- Estilo da banca ${currentBanca}: Foco no padrão histórico e terminologia preferida por esta banca.`;
+  }
 
-CONHECIMENTOS ESPECÍFICOS:
-- Java (fundamentos, OOP, Generics, Collections, Java 8+, Streams, Lambda, CompletableFuture)
-- Spring Framework (IoC/DI, Spring Boot, Spring MVC, Spring Data JPA, Spring Security)
-- REST APIs (princípios REST, HTTP methods, status codes, OpenAPI/Swagger)
-- Microserviços (arquitetura, padrões: Saga, Circuit Breaker, CQRS, Event Sourcing)
-- Banco de Dados (SQL, PostgreSQL, MySQL, NoSQL: MongoDB, Redis, ACID, normalização)
-- Docker e Kubernetes (containers, Dockerfile, compose, pods, deployments, services)
-- DevOps e CI/CD (GitHub Actions, Jenkins, pipelines, Terraform, observabilidade)
-- Cloud (AWS: EC2, S3, RDS, Lambda, VPC, IAM; conceitos IaaS/PaaS/SaaS)
-- Git (branching, rebase, Git Flow, pull requests)
-- Linux (comandos, processos, permissões, shell scripting)
-- Redes (TCP/IP, HTTP/HTTPS, DNS, TLS, WebSockets)
-- Segurança (OWASP Top 10, JWT, OAuth2, criptografia)
-- Testes (TDD, BDD, JUnit 5, Mockito, testes de integração)
-- Clean Code e SOLID principles
-- Design Patterns (Creational, Structural, Behavioral)
-- Arquitetura (Clean Architecture, Hexagonal, DDD, MVC)
-- Mensageria (Kafka, RabbitMQ)
+  return `Você é um Tutor Pedagógico Especialista em concursos públicos de alto nível.
+Você está preparando o aluno especificamente para o concurso:
+🎯 CONCURSO / EDITAL: "${currentTitle}"
+💼 CARGO: "${currentRole}"
+🏛️ BANCA EXAMINADORA OFICIAL: "${currentBanca}"
 
-DIRETRIZES DE RESPOSTA:
-1. Responda sempre em português brasileiro
-2. Use exemplos práticos de código Java/Spring quando relevante
-3. Relacione o conteúdo com questões típicas da banca FGV
-4. Seja didático e conciso — explique como um professor experiente
-5. Para código, use blocos de código formatados com a linguagem
-6. Ao explicar conceitos, use analogias simples
-7. Indique a relevância do tópico para a prova (alta/média/baixa)
-8. Quando solicitado, crie questões no estilo FGV com 5 alternativas e gabarito comentado
-9. Quando solicitado /flashcard, crie flashcards no formato: FRENTE: [pergunta] | VERSO: [resposta]
-10. Quando solicitado /cronograma, pergunte sobre horas disponíveis e matérias prioritárias`;
+${subjectsSummary ? `DISCIPLINAS DO EDITAL:\n${subjectsSummary}\n` : ""}
+
+DIRETRIZES DA BANCA ${currentBanca}:
+${bancaStyle}
+
+DIRETRIZES PEDAGÓGICAS DE RESPOSTA:
+1. Responda sempre em português brasileiro de forma didática, encorajadora e profunda.
+2. Sempre que explicar um assunto ou resolver uma dúvida, aponte: "Como a banca ${currentBanca} costuma cobrar isso e qual pegadinha ela usa".
+3. Use exemplos práticos de código, arquitetura ou diagramas textuais quando relevante.
+4. Para código, use blocos de código formatados com a linguagem correspondente.
+5. Quando o usuário pedir questões, crie questões inéditas no formato e padrão estrito da banca ${currentBanca} (com 5 alternativas A-E e gabarito comentado).
+6. Quando solicitado /flashcard, crie no formato: FRENTE: [pergunta] | VERSO: [resposta].
+7. Quando solicitado /cronograma, organize sugestões adaptadas ao peso das matérias deste edital.`;
+}
 
 export async function POST(request: NextRequest) {
   try {
-    const { messages, context } = await request.json();
+    const { messages, context, editalTitle, role, banca, subjects } = await request.json();
 
     const apiKey = getGeminiApiKey();
     if (!apiKey) {
@@ -56,9 +63,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const basePrompt = buildSystemPrompt(editalTitle, role, banca, subjects);
+
     const systemContent = context
-      ? `${SYSTEM_PROMPT}\n\nMATERIAL DE ESTUDO ENVIADO PELO USUÁRIO (use como contexto quando relevante):\n${context}`
-      : SYSTEM_PROMPT;
+      ? `${basePrompt}\n\nMATERIAL DE ESTUDO ENVIADO PELO USUÁRIO (use como contexto quando relevante):\n${context}`
+      : basePrompt;
 
     const responseContent = await callGemini({
       systemInstruction: systemContent,

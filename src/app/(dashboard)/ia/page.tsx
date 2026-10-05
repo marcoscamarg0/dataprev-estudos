@@ -21,7 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { useActiveCurriculum, useActiveEditalTitle } from "@/store/curriculumStore";
+import { useActiveCurriculum, useActiveEditalTitle, useActiveEdital, useActiveEditalBanca } from "@/store/curriculumStore";
 
 interface Message {
   id: string;
@@ -63,6 +63,8 @@ function formatMessage(content: string) {
 export default function IAPage() {
   const activeCurriculum = useActiveCurriculum();
   const activeTitle = useActiveEditalTitle();
+  const activeEdital = useActiveEdital();
+  const activeBanca = useActiveEditalBanca();
   
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -70,25 +72,25 @@ export default function IAPage() {
   const [copied, setCopied] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
-  // Dynamic Initial Message based on Edital
+  // Dynamic Initial Message based on Edital and Banca
   useEffect(() => {
     if (messages.length === 0) {
-      const subjectList = activeCurriculum.slice(0, 5).map(s => `• **${s.name}**`).join("\\n");
+      const subjectList = activeCurriculum.slice(0, 5).map(s => `• **${s.name}**`).join("\n");
       const initial: Message = {
         id: "0",
         role: "assistant",
-        content: `Olá! Sou seu Tutor de IA focado no edital **${activeTitle}**. Estou aqui para ajudar com os conteúdos da sua prova:\\n\\n${subjectList}\\n${activeCurriculum.length > 5 ? "• ... e muito mais!\\n" : ""}\\nPode me perguntar qualquer coisa, pedir resumos, explicações de questões ou dicas de estudos baseadas nas disciplinas do seu edital. Como posso ajudar?`,
+        content: `Olá! Sou seu Tutor Especialista na banca **${activeBanca}** para o edital **${activeTitle}** (${activeEdital.role}).\n\nEstou preparado para tirar dúvidas, explicar pegadinhas históricas da **${activeBanca}** e guiar seus estudos nas matérias do edital:\n\n${subjectList}\n${activeCurriculum.length > 5 ? "• ... e demais matérias cadastradas!\n" : ""}\nVocê pode me pedir resumos, simulações de questões inéditas no estilo da banca ${activeBanca} ou explicações conceituais. Como posso te ajudar hoje?`,
         timestamp: new Date(),
       };
       setMessages([initial]);
     }
-  }, [activeTitle, activeCurriculum, messages.length]);
+  }, [activeTitle, activeCurriculum, activeBanca, activeEdital.role, messages.length]);
 
   // Dynamic Quick Prompts
   const quickPrompts = activeCurriculum.flatMap(subj => 
     subj.topics.slice(0, 2).map(t => ({
       icon: "💡",
-      text: `Explique ${t.name}`,
+      text: `Explique ${t.name} no estilo ${activeBanca}`,
       category: subj.name
     }))
   ).sort(() => 0.5 - Math.random()).slice(0, 6);
@@ -123,6 +125,10 @@ export default function IAPage() {
             role: m.role,
             content: m.content,
           })),
+          editalTitle: activeTitle,
+          role: activeEdital.role,
+          banca: activeBanca,
+          subjects: activeCurriculum,
         }),
       });
 
@@ -175,10 +181,23 @@ export default function IAPage() {
       <div className="flex flex-col md:flex-row flex-1 min-h-0">
         {/* Sidebar */}
         <div className="hidden md:flex w-64 border-r border-border p-4 flex-col gap-4 shrink-0 overflow-y-auto">
+          <div className="p-3 rounded-lg border border-amber-500/20 bg-amber-500/5 space-y-1.5">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Banca Oficial</span>
+              <Badge variant="outline" className="text-[10px] font-bold border-amber-500/40 text-amber-400 bg-amber-500/10">
+                {activeBanca}
+              </Badge>
+            </div>
+            <p className="text-xs font-semibold text-foreground line-clamp-1">{activeTitle}</p>
+            {activeEdital.role && (
+              <p className="text-[10px] text-muted-foreground line-clamp-1">{activeEdital.role}</p>
+            )}
+          </div>
+
           <div>
             <div className="flex items-center gap-2 mb-3">
               <Sparkles size={13} className="text-chart-1" />
-              <span className="text-xs font-semibold">Sugestões Rápidas</span>
+              <span className="text-xs font-semibold">Sugestões Rápidas ({activeBanca})</span>
             </div>
             <div className="space-y-1">
               {quickPrompts.map((qp, i) => (

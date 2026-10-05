@@ -21,7 +21,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { useActiveCurriculum, useActiveEditalTitle } from "@/store/curriculumStore";
+import { useActiveCurriculum, useActiveEditalTitle, useActiveEdital, useActiveEditalBanca } from "@/store/curriculumStore";
 import { cn, formatTime } from "@/lib/utils";
 
 const SIMULADO_TYPES = [
@@ -73,6 +73,8 @@ export default function SimuladosPage() {
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const activeCurriculum = useActiveCurriculum();
   const activeTitle = useActiveEditalTitle();
+  const activeEdital = useActiveEdital();
+  const activeBanca = useActiveEditalBanca();
 
   const [examMode, setExamMode] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -95,6 +97,8 @@ export default function SimuladosPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           editalTitle: activeTitle,
+          role: activeEdital.role,
+          banca: activeBanca,
           subjects: selectedSubjects,
           count: Math.min(qCount, 5) // Limit max questions for the demo to prevent timeouts
         }),
@@ -176,10 +180,15 @@ export default function SimuladosPage() {
             
             <Card className="mb-6">
               <CardHeader className="pb-4 border-b">
-                <div className="flex items-center justify-between mb-2">
-                  <Badge variant="outline" className="text-[10px] font-normal uppercase tracking-wider">
-                    {currentQuestion.subject} - {currentQuestion.topic}
-                  </Badge>
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-[10px] font-bold border-amber-500/40 text-amber-400 bg-amber-500/10">
+                      Banca: {currentQuestion.banca || activeBanca}
+                    </Badge>
+                    <Badge variant="outline" className="text-[10px] font-normal uppercase tracking-wider">
+                      {currentQuestion.subject} - {currentQuestion.topic}
+                    </Badge>
+                  </div>
                   <Badge variant="secondary" className="text-[10px] capitalize">
                     {currentQuestion.difficulty}
                   </Badge>
@@ -244,11 +253,23 @@ export default function SimuladosPage() {
 
   return (
     <div className="p-6 max-w-[1400px] mx-auto">
-      <div className="mb-6">
-        <h1 className="text-xl font-semibold">Simulados</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">
-          Teste seus conhecimentos com simulados focados no edital: <strong className="font-medium text-foreground">{activeTitle}</strong>
-        </p>
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-xl font-semibold">Simulados</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Teste seus conhecimentos com simulados focados no edital: <strong className="font-medium text-foreground">{activeTitle}</strong>
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Badge variant="outline" className="text-xs px-3 py-1 font-semibold border-amber-500/40 text-amber-400 bg-amber-500/10">
+            🏛️ Banca Oficial: {activeBanca}
+          </Badge>
+          {activeEdital.role && (
+            <Badge variant="secondary" className="text-xs px-3 py-1">
+              💼 {activeEdital.role}
+            </Badge>
+          )}
+        </div>
       </div>
 
       {/* Stats */}
