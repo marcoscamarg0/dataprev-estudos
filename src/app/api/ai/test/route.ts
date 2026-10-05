@@ -10,41 +10,53 @@ export async function GET() {
   }
 
   const maskedKey = `${key.slice(0, 6)}...${key.slice(-4)}`;
-  console.log(`\n🔑 [GeminiTest] Chave: ${maskedKey}`);
+  console.log(`\n${"=".repeat(60)}`);
+  console.log(`🔑 [GeminiTest] Chave: ${maskedKey}`);
 
-  // Step 1: List all models available for this key
-  console.log("📋 [GeminiTest] Buscando modelos disponíveis...");
+  // Step 1: List ALL models
+  console.log("📋 [GeminiTest] Buscando todos os modelos disponíveis...");
   let allModels: string[] = [];
   try {
     const listUrl = `https://generativelanguage.googleapis.com/v1beta/models?key=${key}`;
     const listRes = await fetch(listUrl, { headers: { "x-goog-api-key": key } });
     if (!listRes.ok) {
       const errText = await listRes.text();
-      console.error("❌ Falha ao listar modelos:", errText);
       return NextResponse.json({ success: false, error: `Falha ao listar modelos: ${errText}` }, { status: 500 });
     }
     const listData = await listRes.json();
+    // Filter ONLY text generateContent — skip TTS, audio, image-only, robotics
     allModels = (listData.models || [])
-      .filter((m: any) => m.supportedGenerationMethods?.includes("generateContent"))
+      .filter((m: any) =>
+        m.supportedGenerationMethods?.includes("generateContent") &&
+        !m.name?.includes("-tts") &&
+        !m.name?.includes("transcribe") &&
+        !m.name?.includes("robotics") &&
+        !m.name?.includes("deep-research") &&
+        !m.name?.includes("lyria") &&
+        !m.name?.includes("computer-use") &&
+        !m.name?.includes("preview-tts") &&
+        !m.name?.includes("-image") &&
+        !m.name?.includes("image-preview")
+      )
       .map((m: any) => (m.name || "").replace("models/", ""))
       .filter(Boolean);
 
-    console.log(`✅ ${allModels.length} modelos suportam generateContent:`);
-    allModels.forEach((m) => console.log(`   - ${m}`));
+    console.log(`\n✅ ${allModels.length} modelos para testar:`);
+    allModels.forEach((m, i) => console.log(`   ${i + 1}. ${m}`));
   } catch (e: any) {
-    console.error("❌ Erro ao listar modelos:", e.message);
     return NextResponse.json({ success: false, error: e.message }, { status: 500 });
   }
 
-  // Step 2: Test each model with a real generateContent call
-  console.log("\n🧪 [GeminiTest] Testando cada modelo com uma geração real...\n");
+  // Step 2: Test EVERY model
+  console.log(`\n${"=".repeat(60)}`);
+  console.log("🧪 Testando cada modelo com uma geração real...\n");
 
   const working: string[] = [];
-  const failed: { model: string; reason: string }[] = [];
+  const failed: { model: string; status: number; reason: string }[] = [];
 
   const bodyPayload = {
     contents: [{ role: "user", parts: [{ text: TEST_PROMPT }] }],
-    generationConfig: { temperature: 0.1, maxOutputTokens: 20 },
+    generationConfig: { temperature: 0.1, maxOutputTokens: 10 },
   };
 
   for (const model of allModels) {
@@ -58,9 +70,12 @@ export async function GET() {
 
       if (!res.ok) {
         const errText = await res.text();
-        const errParsed = JSON.parse(errText).error?.message || errText;
-        console.log(`   ❌ ${model}: ${errParsed}`);
-        failed.push({ model, reason: errParsed });
+        let reason = errText;
+        try { reason = JSON.parse(errText).error?.message || errText; } catch {}
+        // Truncate long messages
+        const shortReason = reason.length > 100 ? reason.slice(0, 100) + "..." : reason;
+        console.log(`   ❌ [${res.status}] ${model}: ${shortReason}`);
+        failed.push({ model, status: res.status, reason });
         continue;
       }
 
@@ -71,22 +86,25 @@ export async function GET() {
         working.push(model);
       } else {
         console.log(`   ⚠️ ${model}: resposta vazia`);
-        failed.push({ model, reason: "resposta vazia" });
+        failed.push({ model, status: 200, reason: "resposta vazia" });
       }
     } catch (err: any) {
       console.log(`   ❌ ${model}: ${err.message}`);
-      failed.push({ model, reason: err.message });
+      failed.push({ model, status: 0, reason: err.message });
     }
   }
 
-  console.log(`\n📊 [GeminiTest] Resultado: ${working.length} funcionando, ${failed.length} com falha`);
-  console.log("✅ Modelos funcionando:", working);
+  console.log(`\n${"=".repeat(60)}`);
+  console.log(`📊 RESULTADO FINAL:`);
+  console.log(`   ✅ Funcionando (${working.length}): ${working.join(", ")}`);
+  console.log(`   ❌ Com falha   (${failed.length}): ${failed.map((f) => f.model).join(", ")}`);
+  console.log(`${"=".repeat(60)}\n`);
 
   return NextResponse.json({
     success: working.length > 0,
     keyPreview: maskedKey,
-    working,
-    failed,
     summary: `${working.length} de ${allModels.length} modelos funcionando`,
+    working,
+    failed: failed.map((f) => ({ model: f.model, status: f.status, reason: f.reason.slice(0, 200) })),
   });
 }
