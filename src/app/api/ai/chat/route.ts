@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { callGemini, getGeminiApiKey } from "@/lib/gemini";
 
 const SYSTEM_PROMPT = `Você é um tutor especializado em concursos públicos de TI, com foco no concurso DATAPREV 2026 (Perfil Desenvolvimento de Software) da banca FGV.
 
@@ -40,74 +41,38 @@ DIRETRIZES DE RESPOSTA:
 9. Quando solicitado /flashcard, crie flashcards no formato: FRENTE: [pergunta] | VERSO: [resposta]
 10. Quando solicitado /cronograma, pergunte sobre horas disponíveis e matérias prioritárias`;
 
-const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
-const DEFAULT_MODEL = "nvidia/nemotron-3-ultra-550b-a55b:free";
-
 export async function POST(request: NextRequest) {
   try {
     const { messages, context } = await request.json();
 
-    const apiKey = process.env.OPENROUTER_API_KEY;
+    const apiKey = getGeminiApiKey();
     if (!apiKey) {
       return NextResponse.json(
         {
           error:
-            "OPENROUTER_API_KEY não configurada no servidor. Adicione-a no arquivo .env.",
+            "GEMINI_API_KEY não configurada no servidor. Adicione-a no arquivo .env.",
         },
         { status: 500 }
       );
     }
 
-    const model = process.env.OPENROUTER_MODEL || DEFAULT_MODEL;
-    
-    console.log(`🤖 [OpenRouter] Iniciando requisição para o modelo: ${model}`);
-
     const systemContent = context
       ? `${SYSTEM_PROMPT}\n\nMATERIAL DE ESTUDO ENVIADO PELO USUÁRIO (use como contexto quando relevante):\n${context}`
       : SYSTEM_PROMPT;
 
-    const orMessages = [
-      { role: "system", content: systemContent },
-      ...messages,
-    ];
-
-    const response = await fetch(OPENROUTER_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-        "HTTP-Referer": process.env.APP_URL || "http://localhost:3000",
-        "X-Title": "DATAPREV Estudos",
-      },
-      body: JSON.stringify({
-        model,
-        messages: orMessages,
-        temperature: 0.7,
-        top_p: 0.9,
-      }),
+    const responseContent = await callGemini({
+      systemInstruction: systemContent,
+      messages: messages || [],
+      temperature: 0.7,
     });
 
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error("OpenRouter error:", response.status, errText);
-      return NextResponse.json(
-        { error: "Não foi possível obter resposta da IA (OpenRouter)." },
-        { status: 502 }
-      );
-    }
-
-    const data = await response.json();
-    console.log("✅ [OpenRouter] Resposta recebida com sucesso da IA.");
-    
-    const content =
-      data.choices?.[0]?.message?.content ?? "Não consegui gerar uma resposta.";
-
-    return NextResponse.json({ response: content });
-  } catch (error) {
+    return NextResponse.json({ response: responseContent });
+  } catch (error: any) {
     console.error("AI chat error:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
+      { error: error?.message || "Não foi possível obter resposta do Gemini." },
+      { status: 502 }
     );
   }
 }
+

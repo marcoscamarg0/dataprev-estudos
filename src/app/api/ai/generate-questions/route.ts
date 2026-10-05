@@ -1,20 +1,11 @@
 import { NextResponse } from "next/server";
-
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
-
-const DEFAULT_MODELS = [
-  "poolside/laguna-xs-2.1:free",
-  "tencent/hy3:free",
-  "meta-llama/llama-3.3-70b-instruct:free",
-  "meta-llama/llama-3.1-8b-instruct:free",
-  "google/gemma-4-26b-a4b-it:free"
-];
-const MODELS_TO_TRY = process.env.OPENROUTER_MODELS ? process.env.OPENROUTER_MODELS.split(",") : DEFAULT_MODELS;
+import { callGeminiJson, getGeminiApiKey } from "@/lib/gemini";
 
 export async function POST(req: Request) {
   try {
-    if (!OPENROUTER_API_KEY) {
-      throw new Error("Missing OPENROUTER_API_KEY environment variable");
+    const apiKey = getGeminiApiKey();
+    if (!apiKey) {
+      throw new Error("Missing GEMINI_API_KEY environment variable");
     }
 
     const { editalTitle, subjects, count = 5 } = await req.json();
@@ -57,64 +48,18 @@ Formato JSON EXIGIDO:
   ]
 }`;
 
-    let lastError = null;
-    let rawContent = "";
+    const parsedData = await callGeminiJson<{ questions?: any[] } | any[]>({
+      prompt,
+      temperature: 0.7,
+    });
 
-    for (const model of MODELS_TO_TRY) {
-      try {
-        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            model: model,
-            messages: [{ role: "user", content: prompt }],
-            response_format: { type: "json_object" }
-          })
-        });
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error(`OpenRouter API error with ${model}:`, errorText);
-          lastError = errorText;
-          continue; // Try next model on failure (like 429 rate limit)
-        }
-
-        const data = await response.json();
-        rawContent = data.choices?.[0]?.message?.content || "";
-        break; // Success! Stop trying models
-      } catch (err: any) {
-        console.error(`Fetch error with ${model}:`, err);
-        lastError = err.message;
-      }
+    if (Array.isArray(parsedData)) {
+      return NextResponse.json({ questions: parsedData });
     }
-
-    if (!rawContent) {
-      throw new Error("All fallback models failed. Last error: " + lastError);
-    }
-
-    // Cleanup Markdown block and extract JSON
-    let jsonStr = rawContent;
-    const match = jsonStr.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
-    if (match) {
-      jsonStr = match[0];
-    }
-
-    try {
-      const parsedData = JSON.parse(jsonStr);
-      if (Array.isArray(parsedData)) {
-        return NextResponse.json({ questions: parsedData });
-      }
-      return NextResponse.json(parsedData);
-    } catch (parseError) {
-      console.error("Failed to parse JSON from AI. Raw content:", rawContent);
-      return NextResponse.json({ error: "A IA retornou um formato inválido." }, { status: 500 });
-    }
-
+    return NextResponse.json(parsedData);
   } catch (error: any) {
-    console.error("AI Error:", error);
+    console.error("AI Generate Questions Error:", error);
     return NextResponse.json({ error: error.message || "Unknown error" }, { status: 500 });
   }
 }
+

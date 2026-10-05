@@ -9,7 +9,7 @@ simulados, flashcards, cronograma, biblioteca de materiais e tutor de IA.
 - Tailwind CSS + Radix UI
 - Prisma + PostgreSQL
 - Autenticação própria (JWT + cookie httpOnly + bcrypt)
-- IA: [OpenRouter](https://openrouter.ai) com o modelo `nvidia/nemotron-3-ultra-550b-a55b:free`
+- IA: [Google Gemini](https://ai.google.dev/) com o modelo gratuito `gemini-2.0-flash` (com fallback para `gemini-1.5-flash`)
 - Gráficos: Recharts
 
 ## Configuração do zero
@@ -31,9 +31,9 @@ cp .env.example .env
 - `DATABASE_URL` / `DIRECT_URL`: string de conexão PostgreSQL (pode usar
   [Supabase](https://supabase.com), [Neon](https://neon.tech) ou Postgres local).
 - `JWT_SECRET`: qualquer string longa e aleatória (ex: `openssl rand -hex 32`).
-- `OPENROUTER_API_KEY`: gerada em https://openrouter.ai/keys (necessária para o
+- `GEMINI_API_KEY`: gerada no [Google AI Studio](https://aistudio.google.com/app/apikey) (necessária para o
   tutor de IA — a chave fica só no servidor, nunca é exposta no navegador).
-- `OPENROUTER_MODEL`: já vem preenchida com o modelo gratuito da Nemotron.
+- `GEMINI_MODEL`: modelo padrão (ex: `gemini-2.0-flash`).
 
 ### 3. Criar o banco de dados
 
@@ -60,7 +60,7 @@ Abra http://localhost:3000 — você será redirecionado para `/login`. Clique e
   MD, etc.) ou links, com tags. Arquivos ficam em `public/uploads/{userId}/`.
   Arquivos de texto (`.txt`, `.md`, `.csv`, `.json`) têm o conteúdo extraído
   automaticamente para servir de contexto ao tutor de IA.
-- **Tutor de IA** (`/ia`): conversa com a Nemotron via OpenRouter, com prompt
+- **Tutor de IA** (`/ia`): conversa com o Google Gemini, com prompt
   especializado no edital da DATAPREV/FGV.
 - **Estatísticas** (`/estatisticas`): gráficos (pizza, barras) de progresso e
   desempenho por matéria.

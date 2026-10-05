@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { callGemini, getGeminiApiKey } from "@/lib/gemini";
 
 const CURRICULUM_SYSTEM_PROMPT = `Você é um especialista em currículos e sistemas ATS (Applicant Tracking System) para vagas de tecnologia.
 
@@ -52,18 +53,14 @@ PROJETOS E CONQUISTAS (omitir seção se não houver)
 IDIOMA: Sempre em português brasileiro
 Retorne APENAS o texto do currículo, sem explicações nem comentários extras.`;
 
-
-const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
-const DEFAULT_MODEL = "nvidia/nemotron-3-ultra-550b-a55b:free";
-
 export async function POST(request: NextRequest) {
   try {
     const { profile, jobDescription } = await request.json();
 
-    const apiKey = process.env.OPENROUTER_API_KEY;
+    const apiKey = getGeminiApiKey();
     if (!apiKey) {
       return NextResponse.json(
-        { error: "OPENROUTER_API_KEY não configurada no servidor." },
+        { error: "GEMINI_API_KEY não configurada no servidor." },
         { status: 500 }
       );
     }
@@ -74,8 +71,6 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-
-    const model = process.env.OPENROUTER_MODEL || DEFAULT_MODEL;
 
     const userMessage = `
 DESCRIÇÃO DA VAGA:
@@ -161,49 +156,22 @@ Adapte o resumo profissional e destaque as experiências mais relevantes para os
 Incorpore as palavras-chave da vaga naturalmente no texto.
 `;
 
-    console.log(`🤖 [Curriculum] Gerando currículo com modelo: ${model}`);
+    console.log(`🤖 [Curriculum] Gerando currículo com Gemini`);
 
-    const response = await fetch(OPENROUTER_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-        "HTTP-Referer": process.env.APP_URL || "http://localhost:3000",
-        "X-Title": "DATAPREV Estudos - Gerador de Currículo",
-      },
-      body: JSON.stringify({
-        model,
-        messages: [
-          { role: "system", content: CURRICULUM_SYSTEM_PROMPT },
-          { role: "user", content: userMessage },
-        ],
-        temperature: 0.5,
-        top_p: 0.9,
-        max_tokens: 3000,
-      }),
+    const curriculum = await callGemini({
+      systemInstruction: CURRICULUM_SYSTEM_PROMPT,
+      prompt: userMessage,
+      temperature: 0.5,
+      maxOutputTokens: 3000,
     });
 
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error("OpenRouter error:", response.status, errText);
-      return NextResponse.json(
-        { error: "Não foi possível gerar o currículo. Tente novamente." },
-        { status: 502 }
-      );
-    }
-
-    const data = await response.json();
-    console.log("✅ [Curriculum] Currículo gerado com sucesso.");
-
-    const curriculum =
-      data.choices?.[0]?.message?.content ?? "Não foi possível gerar o currículo.";
-
     return NextResponse.json({ curriculum });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Curriculum generation error:", error);
     return NextResponse.json(
-      { error: "Erro interno do servidor." },
+      { error: error?.message || "Erro interno do servidor." },
       { status: 500 }
     );
   }
 }
+

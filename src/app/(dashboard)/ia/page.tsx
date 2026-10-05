@@ -145,7 +145,7 @@ export default function IAPage() {
         const fallback: Message = {
           id: (Date.now() + 1).toString(),
           role: "assistant",
-          content: `⚠️ **Erro de Conexão:**\n\n${errorMessage}\n\n*Verifique se a variável \`OPENROUTER_API_KEY\` está configurada corretamente no Render (ou no seu arquivo .env se estiver rodando localmente).*`,
+          content: `⚠️ **Erro de Conexão:**\n\n${errorMessage}\n\n*Verifique se a variável \`GEMINI_API_KEY\` está configurada corretamente no Render (ou no seu arquivo .env se estiver rodando localmente).*`,
           timestamp: new Date(),
         };
         setMessages((prev) => [...prev, fallback]);
@@ -223,7 +223,7 @@ export default function IAPage() {
           <div className="mt-auto p-2 rounded-md bg-muted/30 border border-border">
             <div className="flex items-center gap-1.5 mb-1">
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-[10px] font-medium">OpenRouter (Nemotron)</span>
+              <span className="text-[10px] font-medium">Google Gemini</span>
             </div>
             <p className="text-[10px] text-muted-foreground">
               Conectado via API Key do arquivo de ambiente
@@ -350,7 +350,7 @@ export default function IAPage() {
               </Button>
             </div>
             <p className="text-[10px] text-muted-foreground text-center mt-2">
-              Powered by OpenRouter · Pressione Enter para enviar
+              Powered by Google Gemini · Pressione Enter para enviar
             </p>
           </div>
         </div>

@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-
-const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
-const DEFAULT_MODEL = "nvidia/nemotron-3-ultra-550b-a55b:free";
+import { callGeminiJson, getGeminiApiKey } from "@/lib/gemini";
 
 const PARSE_SYSTEM_PROMPT = `Você é um especialista em análise de currículos e perfis do LinkedIn. 
 Sua tarefa é extrair informações estruturadas de um texto extraído de um PDF de perfil do LinkedIn.
@@ -57,7 +55,7 @@ REGRAS IMPORTANTES:
 
 export async function POST(request: NextRequest) {
   try {
-    // Now receives extracted text (not a file) — parsing happens client-side
+    // Receives extracted text from client
     const { text } = await request.json();
 
     if (!text || typeof text !== "string" || text.trim().length < 20) {
@@ -67,83 +65,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const apiKey = process.env.OPENROUTER_API_KEY;
+    const apiKey = getGeminiApiKey();
     if (!apiKey) {
       return NextResponse.json(
-        { error: "OPENROUTER_API_KEY não configurada." },
+        { error: "GEMINI_API_KEY não configurada." },
         { status: 500 }
       );
     }
 
-    const model = process.env.OPENROUTER_MODEL || DEFAULT_MODEL;
+    console.log(`🤖 [LinkedIn Parser] Enviando ${text.length} chars para Gemini`);
 
-    console.log(`🤖 [LinkedIn Parser] Enviando ${text.length} chars para IA (${model})`);
-
-    const response = await fetch(OPENROUTER_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-        "HTTP-Referer": process.env.APP_URL || "http://localhost:3000",
-        "X-Title": "DATAPREV Estudos - LinkedIn PDF Parser",
-      },
-      body: JSON.stringify({
-        model,
-        messages: [
-          { role: "system", content: PARSE_SYSTEM_PROMPT },
-          {
-            role: "user",
-            content: `Extraia as informações do seguinte texto de perfil LinkedIn e retorne o JSON estruturado:\n\n${text}`,
-          },
-        ],
-        temperature: 0.1,
-        top_p: 0.9,
-        max_tokens: 4000,
-      }),
+    const parsedProfile = await callGeminiJson<any>({
+      systemInstruction: PARSE_SYSTEM_PROMPT,
+      prompt: `Extraia as informações do seguinte texto de perfil LinkedIn e retorne o JSON estruturado:\n\n${text}`,
+      temperature: 0.1,
     });
 
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error("OpenRouter error:", response.status, errText);
-      return NextResponse.json(
-        { error: "Erro ao processar com IA. Tente novamente." },
-        { status: 502 }
-      );
-    }
-
-    const data = await response.json();
-    const content = data.choices?.[0]?.message?.content ?? "";
-
-    console.log("✅ [LinkedIn Parser] IA retornou dados. Fazendo parse do JSON...");
-
-    // Parse JSON from AI response — clean markdown code blocks if present
-    let parsedProfile;
-    try {
-      const cleanedContent = content
-        .replace(/```json\n?/gi, "")
-        .replace(/```\n?/gi, "")
-        .trim();
-      parsedProfile = JSON.parse(cleanedContent);
-    } catch {
-      const jsonMatch = content.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        try {
-          parsedProfile = JSON.parse(jsonMatch[0]);
-        } catch {
-          console.error("JSON parse error from AI:", content.slice(0, 200));
-          return NextResponse.json(
-            { error: "A IA não conseguiu estruturar os dados. Tente novamente." },
-            { status: 500 }
-          );
-        }
-      } else {
-        console.error("No JSON in AI response:", content.slice(0, 200));
-        return NextResponse.json(
-          { error: "A IA não retornou um JSON válido. Tente novamente." },
-          { status: 500 }
-        );
-      }
-    }
+    console.log("✅ [LinkedIn Parser] Gemini retornou dados. Estruturando IDs...");
 
     // Add IDs to array items (required by frontend)
     const ts = Date.now();
@@ -169,11 +107,12 @@ export async function POST(request: NextRequest) {
     );
 
     return NextResponse.json({ profile: withIds });
-  } catch (error) {
+  } catch (error: any) {
     console.error("LinkedIn PDF parse error:", error);
     return NextResponse.json(
-      { error: "Erro interno do servidor." },
+      { error: error?.message || "Erro interno do servidor." },
       { status: 500 }
     );
   }
 }
+
