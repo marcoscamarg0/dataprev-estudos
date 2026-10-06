@@ -70,17 +70,6 @@ const STATUS_CONFIG: Record<
   mastered: { label: "Dominado", class: "status-mastered", icon: CheckCircle2 },
 };
 
-const COMMON_BANCAS = [
-  "FGV",
-  "Cebraspe (CESPE)",
-  "FCC (Fundação Carlos Chagas)",
-  "Cesgranrio",
-  "Vunesp",
-  "Quadrix",
-  "AOCP",
-  "IBFC",
-];
-
 export default function EditalPage() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "general" | "specific">("all");
@@ -94,7 +83,6 @@ export default function EditalPage() {
   const [isResearchingAll, setIsResearchingAll] = useState(false);
   const [researchingTopicId, setResearchingTopicId] = useState<string | null>(null);
   const [editingBanca, setEditingBanca] = useState(false);
-  const [customBanca, setCustomBanca] = useState("");
   const [selectedTopicForModal, setSelectedTopicForModal] = useState<{
     subject: SubjectData;
     topic: TopicData;
@@ -104,7 +92,6 @@ export default function EditalPage() {
   const activeEdital = useActiveEdital();
   const activeBanca = useActiveEditalBanca();
   const activeBancaProfile = useActiveEditalBancaProfile();
-  const activeOverview = useActiveEditalOverview();
 
   const {
     editais,
@@ -265,7 +252,6 @@ export default function EditalPage() {
 
       if (data.analysis) {
         updateTopicBancaAnalysis(activeEditalId, subject.id, topic.id, data.analysis);
-        // Also expand topic so user sees the result immediately
         setExpandedTopics((prev) => new Set(prev).add(topic.id));
         setExpandedSubjects((prev) => new Set(prev).add(subject.id));
         toast.success(`Raio-X da Banca gerado para: ${topic.name}`);

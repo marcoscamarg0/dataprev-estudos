@@ -30,6 +30,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useCurriculumStore } from "@/store/curriculumStore";
+import { cn } from "@/lib/utils";
 
 interface LogEntry {
   id: string;
