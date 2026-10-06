@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { callGeminiJson, getGeminiApiKey } from "@/lib/gemini";
-import { SubjectData, BancaEditalProfile } from "@/lib/curriculum";
+import { SubjectData, TopicData, BancaEditalProfile } from "@/lib/curriculum";
 
 export async function POST(req: NextRequest) {
   try {
@@ -127,7 +127,7 @@ ${JSON.stringify(simplifiedCurriculum, null, 2)}`;
         ...subj,
         bancaSubjectOverview:
           analyzedSubj?.bancaSubjectOverview || subj.bancaSubjectOverview,
-        topics: subj.topics.map((top) => {
+        topics: subj.topics.map((top: TopicData) => {
           const analyzedTopic = analyzedSubj?.topics?.find((t) => t.id === top.id);
           if (analyzedTopic) {
             return {
