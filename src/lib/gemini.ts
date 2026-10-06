@@ -35,6 +35,7 @@ export interface CallGeminiOptions {
   temperature?: number;
   maxOutputTokens?: number;
   models?: string[];
+  enableSearch?: boolean;
 }
 
 /**
@@ -303,8 +304,9 @@ export async function callGemini(options: CallGeminiOptions): Promise<string> {
       topP: 0.95,
       // Default to 8192 tokens so long answers/JSON never truncate mid-generation
       maxOutputTokens: options.maxOutputTokens ?? 8192,
-      ...(options.responseJson ? { responseMimeType: "application/json" } : {}),
+      ...(options.responseJson && !options.enableSearch ? { responseMimeType: "application/json" } : {}),
     },
+    ...(options.enableSearch ? { tools: [{ googleSearch: {} }] } : {}),
   };
 
   if (options.systemInstruction) {
@@ -319,6 +321,16 @@ export async function callGemini(options: CallGeminiOptions): Promise<string> {
       console.log(`==================================================\n`);
       return rawText;
     } catch (err: any) {
+      if (options.enableSearch) {
+        // Fallback retry without tools if model does not support Google Search tool
+        try {
+          console.warn(`⚠️ [Gemini] Tentando modelo ${model} sem ferramenta de busca...`);
+          const payloadNoTools = { ...bodyPayload, tools: undefined };
+          const fallbackText = await callSingleGeminiModel(model, apiKey, options, payloadNoTools);
+          console.log(`==================================================\n`);
+          return fallbackText;
+        } catch {}
+      }
       lastError = err;
     }
   }
@@ -353,8 +365,9 @@ export async function callGeminiJson<T = any>(options: CallGeminiOptions): Promi
       temperature: options.temperature ?? 0.4,
       topP: 0.95,
       maxOutputTokens: options.maxOutputTokens ?? 8192,
-      responseMimeType: "application/json",
+      ...(options.enableSearch ? {} : { responseMimeType: "application/json" }),
     },
+    ...(options.enableSearch ? { tools: [{ googleSearch: {} }] } : {}),
   };
 
   if (options.systemInstruction) {
@@ -365,8 +378,19 @@ export async function callGeminiJson<T = any>(options: CallGeminiOptions): Promi
 
   for (const model of modelsToTry) {
     try {
-      console.log(`🤖 [Gemini JSON] Chamando modelo: ${model}`);
-      const rawContent = await callSingleGeminiModel(model, apiKey, options, bodyPayload);
+      console.log(`🤖 [Gemini JSON] Chamando modelo: ${model} (enableSearch: ${!!options.enableSearch})`);
+      let rawContent: string;
+      try {
+        rawContent = await callSingleGeminiModel(model, apiKey, options, bodyPayload);
+      } catch (callErr: any) {
+        if (options.enableSearch) {
+          console.warn(`⚠️ [Gemini JSON] Fallback sem ferramenta de busca no modelo ${model}...`);
+          const noSearchPayload = { ...bodyPayload, tools: undefined };
+          rawContent = await callSingleGeminiModel(model, apiKey, options, noSearchPayload);
+        } else {
+          throw callErr;
+        }
+      }
       
       try {
         const parsed = safeParseJson<T>(rawContent);
@@ -374,9 +398,9 @@ export async function callGeminiJson<T = any>(options: CallGeminiOptions): Promi
         return parsed;
       } catch (parseError) {
         console.warn(`⚠️ [Gemini JSON] Modelo ${model} respondeu mas JSON estava inválido. Tentando fallback sem responseMimeType...`);
-        // Fallback try without responseMimeType in case this specific model struggles with it
         const fallbackPayload = {
           ...bodyPayload,
+          tools: undefined,
           generationConfig: {
             ...bodyPayload.generationConfig,
             responseMimeType: undefined,
@@ -400,3 +424,4 @@ export async function callGeminiJson<T = any>(options: CallGeminiOptions): Promi
   console.error("❌ [Gemini JSON] Todos os modelos falharam ao gerar JSON válido.");
   throw lastError || new Error("A IA não retornou um formato JSON válido após várias tentativas.");
 }
+

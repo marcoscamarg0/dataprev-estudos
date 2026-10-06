@@ -1,5 +1,40 @@
 // Complete DATAPREV 2026 curriculum based on the official FGV exam notice
 
+export interface WebReferenceItem {
+  title: string;
+  url?: string;
+  snippet?: string;
+}
+
+export interface SampleQuestionSnippet {
+  statement: string;
+  alternatives?: string[];
+  correctAnswer?: string;
+  explanation?: string;
+}
+
+export interface TopicBancaAnalysis {
+  importance: "Alta" | "Média" | "Baixa";
+  relevanceScore?: number; // 1 to 10
+  approachStyle: string; // Ex: "Prático com código", "Letra da Lei", "Conceitual", "Pegadinhas de Sintaxe"
+  frequentQuestions: string[]; // Principais subtópicos / conceitos mais cobrados pela banca
+  commonTraps: string[]; // Pegadinhas e armadilhas típicas da banca
+  howToStudy: string; // Estratégia tática para estudar esse tópico
+  webReferences?: WebReferenceItem[];
+  sampleQuestionSnippet?: SampleQuestionSnippet | string;
+  analyzedAt?: string;
+}
+
+export interface BancaEditalProfile {
+  bancaName: string;
+  generalProfile: string; // Perfil detalhado da banca examinadora
+  scoringCharacteristics: string; // Formato de questões, pontuação e critérios
+  recentTrends: string[]; // Tendências recentes 2024-2026 levantadas na web
+  recommendedStrategy: string; // Estratégia recomendada para fechar a prova
+  topPrioritySubjects?: string[]; // Disciplinas mais cruciais
+  analyzedAt?: string;
+}
+
 export interface SubtopicData {
   id: string;
   name: string;
@@ -9,6 +44,7 @@ export interface TopicData {
   id: string;
   name: string;
   subtopics: SubtopicData[];
+  bancaAnalysis?: TopicBancaAnalysis;
 }
 
 export interface SubjectData {
@@ -18,6 +54,7 @@ export interface SubjectData {
   color: string;
   weight: number;
   topics: TopicData[];
+  bancaSubjectOverview?: string;
 }
 
 export const DATAPREV_CURRICULUM: SubjectData[] = [
@@ -32,6 +69,42 @@ export const DATAPREV_CURRICULUM: SubjectData[] = [
       {
         id: "port-compreensao",
         name: "Compreensão e Interpretação de Textos",
+        bancaAnalysis: {
+          importance: "Alta",
+          relevanceScore: 10,
+          approachStyle: "Interpretação Semântica e Inferência Implícita",
+          frequentQuestions: [
+            "Inferência de pressupostos e subentendidos no texto",
+            "Identificação da tese e argumentos principais do autor",
+            "Coesão referencial por pronomes anafóricos e catáfóricos",
+          ],
+          commonTraps: [
+            "Alternativas com extrapolação lógica (afirmações que parecem verdadeiras no mundo real mas não estão no texto)",
+            "Pegadinhas com sinonímia contextual onde uma palavra muda o sentido global",
+          ],
+          howToStudy:
+            "A FGV possui o Português mais temido dos concursos. Não adianta apenas dominar regras gramaticais estáticas; pratique lendo artigos de opinião densos e resolva pelo menos 100 questões recentes de interpretação da FGV para captar a visão do examinador.",
+          webReferences: [
+            {
+              title: "Manual de Interpretação FGV - Análise de Estilo",
+              snippet: "Guia de estratégias para eliminação de distratores semânticos em provas FGV.",
+            },
+          ],
+          sampleQuestionSnippet: {
+            statement:
+              "Em: 'Embora a tecnologia automatize processos, a empatia permanece humana', a oração introduzida por 'Embora' estabelece relação de:",
+            alternatives: [
+              "A) Causa",
+              "B) Concessão",
+              "C) Consequência",
+              "D) Proporção",
+              "E) Finalidade",
+            ],
+            correctAnswer: "B",
+            explanation:
+              "'Embora' é a conjunção subordinativa concessiva por excelência, introduzindo uma ideia de quebra de expectativa ou contraste que não impede o fato principal.",
+          },
+        },
         subtopics: [
           { id: "port-comp-01", name: "Leitura e interpretação" },
           { id: "port-comp-02", name: "Inferência e pressupostos" },
@@ -153,6 +226,45 @@ export const DATAPREV_CURRICULUM: SubjectData[] = [
       {
         id: "java-moderno",
         name: "Java Moderno (8+)",
+        bancaAnalysis: {
+          importance: "Alta",
+          relevanceScore: 10,
+          approachStyle: "Prático com Trechos de Código e Rastreamento de Execução",
+          frequentQuestions: [
+            "Diferença entre map() e flatMap() em Streams API",
+            "Lazy evaluation (execução sob demanda) e operações intermediárias vs terminais",
+            "Uso correto de Optional.ofNullable(), orElse() vs orElseGet()",
+            "Records (imutabilidade e métodos canônicos) e Pattern Matching",
+          ],
+          commonTraps: [
+            "Tentativa de reutilizar uma Stream já consumida (lança IllegalStateException)",
+            "Pegadinhas com Optional.get() sem verificação prévia com isPresent() ou ifPresent()",
+            "Operações de short-circuiting (findFirst, anyMatch) interrompendo o pipeline",
+          ],
+          howToStudy:
+            "A FGV adora colocar blocos de 15 a 20 linhas de código Java funcional com Streams encadeadas e perguntar o resultado no console ou exceção lançada. Pratique resolvendo as questões sem IDE, simulando cada passo na folha.",
+          webReferences: [
+            {
+              title: "Oracle Java 17 / 21 Documentation - Streams & Lambdas",
+              url: "https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/stream/Stream.html",
+              snippet: "Documentação canônica sobre o comportamento de operações terminais e concorrência paralela.",
+            },
+          ],
+          sampleQuestionSnippet: {
+            statement:
+              "Considere o código: List<String> list = List.of('a', 'b', 'c'); Stream<String> stream = list.stream(); stream.forEach(System.out::print); long count = stream.count(); O que acontece?",
+            alternatives: [
+              "A) Imprime 'abc' e count recebe 3.",
+              "B) Imprime 'abc' e lança IllegalStateException na linha do count().",
+              "C) Erro de compilação na criação da lista imutável.",
+              "D) Lança NullPointerException.",
+              "E) Executa em paralelo imprimindo em ordem aleatória.",
+            ],
+            correctAnswer: "B",
+            explanation:
+              "Uma Stream em Java só pode ser consumida uma única vez. Como forEach() é uma operação terminal, a Stream foi fechada; ao tentar invocar count(), a JVM lança IllegalStateException.",
+          },
+        },
         subtopics: [
           { id: "java-mod-01", name: "Lambda expressions" },
           { id: "java-mod-02", name: "Streams API" },
@@ -194,6 +306,44 @@ export const DATAPREV_CURRICULUM: SubjectData[] = [
       {
         id: "spring-boot",
         name: "Spring Boot",
+        bancaAnalysis: {
+          importance: "Alta",
+          relevanceScore: 9,
+          approachStyle: "Arquitetural e Configuração de Microsserviços",
+          frequentQuestions: [
+            "Auto-configuration (@EnableAutoConfiguration e @SpringBootApplication)",
+            "Hierarquia de carregamento do application.properties / application.yml e Profiles (@Profile)",
+            "Endpoints do Spring Boot Actuator (/health, /metrics, /info) e segurança",
+            "Starters dependentes (spring-boot-starter-web, spring-boot-starter-data-jpa)",
+          ],
+          commonTraps: [
+            "Confundir as 3 anotações combinadas em @SpringBootApplication (@Configuration, @EnableAutoConfiguration, @ComponentScan)",
+            "Pegadinhas sobre a ordem de precedência de carregamento de configurações (variáveis de ambiente vs properties)",
+          ],
+          howToStudy:
+            "Foque em entender como o Spring Boot inicia o container embutido (Tomcat/Netty) e como funcionam as anotações condicionais (@ConditionalOnProperty, @ConditionalOnClass).",
+          webReferences: [
+            {
+              title: "Spring Boot Official Reference Guide",
+              url: "https://docs.spring.io/spring-boot/docs/current/reference/html/",
+              snippet: "Guia completo sobre Auto-Configuration, Actuator e gerenciamento de dependências.",
+            },
+          ],
+          sampleQuestionSnippet: {
+            statement:
+              "A anotação @SpringBootApplication é um atalho de conveniência que equivale à combinação de três outras anotações principais do ecossistema Spring. Quais são elas?",
+            alternatives: [
+              "A) @Component, @Service, @Repository",
+              "B) @Configuration, @EnableAutoConfiguration, @ComponentScan",
+              "C) @RestController, @Autowired, @Transactional",
+              "D) @SpringBootConfiguration, @Bean, @Profile",
+              "E) @EntityScan, @EnableJpaRepositories, @EnableWebMvc",
+            ],
+            correctAnswer: "B",
+            explanation:
+              "@SpringBootApplication combina @Configuration (define classe de config), @EnableAutoConfiguration (habilita o mecanismo inteligente do Boot) e @ComponentScan (varre componentes no pacote base).",
+          },
+        },
         subtopics: [
           { id: "spr-boot-01", name: "Auto-configuration" },
           { id: "spr-boot-02", name: "application.properties / yml" },

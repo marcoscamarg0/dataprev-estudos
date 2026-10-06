@@ -1,6 +1,11 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { DATAPREV_CURRICULUM, SubjectData } from "@/lib/curriculum";
+import {
+  DATAPREV_CURRICULUM,
+  SubjectData,
+  BancaEditalProfile,
+  TopicBancaAnalysis,
+} from "@/lib/curriculum";
 
 export interface StudySummary {
   id: string;
@@ -50,6 +55,7 @@ export interface EditalData {
   createdAt: string;
   curriculum: SubjectData[];
   studyMaterials?: StudyMaterialBundle;
+  bancaProfile?: BancaEditalProfile;
 }
 
 // ==================== 1. DATAPREV 2026 ====================
@@ -194,6 +200,30 @@ export const DEFAULT_DATAPREV_MATERIALS: StudyMaterialBundle = {
   ],
 };
 
+export const DEFAULT_DATAPREV_BANCA_PROFILE: BancaEditalProfile = {
+  bancaName: "FGV (Fundação Getulio Vargas)",
+  generalProfile:
+    "A FGV é conhecida por enunciados longos e contextualizados, alto rigor conceitual e questões práticas que cobram resolução de problemas reais de engenharia. Em TI, prioriza fortemente arquitetura, Java moderno, concorrência, microsserviços, SQL avançado e boas práticas (SOLID e Clean Code).",
+  scoringCharacteristics:
+    "Prova de múltipla escolha com 5 alternativas (A-E). Não há fator de correção negativo (uma errada não anula uma certa), porém a extensão dos textos exige gestão rigorosa de tempo (cerca de 2.5 a 3 minutos por questão).",
+  recentTrends: [
+    "Aumento significativo de questões com trechos de código Java (Streams API, Lambdas, Generics, Optionals) exigindo rastreamento mental da saída.",
+    "Cobrança aprofundada de padrões de resiliência em microsserviços (Circuit Breaker, Saga, Outbox) e observabilidade (Prometheus, OpenTelemetry).",
+    "Foco em PostgreSQL (planos de execução EXPLAIN ANALYZE, isolamento de transações ACID e índices parciais).",
+    "Segurança de APIs (OAuth2, OpenID Connect, JWT e mitigações OWASP Top 10).",
+  ],
+  recommendedStrategy:
+    "1. Comece pelas questões de TI direta que você tem certeza para garantir pontos rápidos; 2. Deixe textos longos de Português e interpretação pesada para a segunda etapa; 3. Cuidado com alternativas 'quase corretas' que alteram pequenos detalhes sintáticos.",
+  topPrioritySubjects: [
+    "Java e Spring Boot",
+    "Microsserviços & REST",
+    "Banco de Dados & PostgreSQL",
+    "DevOps & Docker/Kubernetes",
+    "Língua Portuguesa",
+  ],
+  analyzedAt: new Date().toISOString(),
+};
+
 const DEFAULT_EDITAL: EditalData = {
   id: "dataprev-2026",
   title: "Dataprev 2026 - Desenvolvedor",
@@ -202,7 +232,9 @@ const DEFAULT_EDITAL: EditalData = {
   createdAt: new Date().toISOString(),
   curriculum: DATAPREV_CURRICULUM,
   studyMaterials: DEFAULT_DATAPREV_MATERIALS,
+  bancaProfile: DEFAULT_DATAPREV_BANCA_PROFILE,
 };
+
 
 // ==================== 2. CÂMARA DOS DEPUTADOS ====================
 export const CAMARA_CURRICULUM: SubjectData[] = [
@@ -394,6 +426,28 @@ export const CAMARA_MATERIALS: StudyMaterialBundle = {
   ],
 };
 
+export const DEFAULT_CAMARA_BANCA_PROFILE: BancaEditalProfile = {
+  bancaName: "FGV (Fundação Getulio Vargas)",
+  generalProfile:
+    "Concurso de alto nível da Câmara dos Deputados. A FGV cobra profundidade acadêmica e prática simultaneamente, com forte ênfase em Governança (ITIL v4, COBIT), Arquitetura Corporativa, Engenharia de Software e Segurança da Informação.",
+  scoringCharacteristics:
+    "Múltipla escolha (A-E) com peso diferenciado para Conhecimentos Específicos (peso 2.5x a 3.0x). A nota de corte tende a ser alta, exigindo mais de 80% de acerto nas matérias de peso.",
+  recentTrends: [
+    "Questões interdisciplinares combinando Engenharia de Software ágil com microsserviços e mensageria.",
+    "Forte presença de modelagem dimensional para Data Warehouse e tuning de consultas SQL.",
+    "Governança alinhada à contratação pública de TI (Lei 14.133/2021).",
+  ],
+  recommendedStrategy:
+    "Priorize as disciplinas de peso 3.0 (Backend, Arquitetura e Banco de Dados) nas revisões diárias. Pratique com simulados de 4 horas para suportar o cansaço visual dos enunciados.",
+  topPrioritySubjects: [
+    "Arquitetura de Software",
+    "Desenvolvimento Backend",
+    "Banco de Dados",
+    "Engenharia de Software",
+  ],
+  analyzedAt: new Date().toISOString(),
+};
+
 const DEFAULT_CAMARA_EDITAL: EditalData = {
   id: "camara-dos-deputados",
   title: "Câmara dos Deputados - Analista Legislativo (TI)",
@@ -403,6 +457,7 @@ const DEFAULT_CAMARA_EDITAL: EditalData = {
   createdAt: new Date().toISOString(),
   curriculum: CAMARA_CURRICULUM,
   studyMaterials: CAMARA_MATERIALS,
+  bancaProfile: DEFAULT_CAMARA_BANCA_PROFILE,
 };
 
 interface CurriculumState {
@@ -413,9 +468,22 @@ interface CurriculumState {
   fetchEditais: () => Promise<void>;
   addEdital: (edital: Omit<EditalData, "id" | "createdAt">) => Promise<void>;
   updateEdital: (id: string, data: Partial<Omit<EditalData, "id" | "createdAt">>) => Promise<void>;
+  updateEditalBanca: (id: string, banca: string) => void;
   removeEdital: (id: string) => Promise<void>;
   setActiveEdital: (id: string) => void;
   setEditalStudyMaterials: (id: string, materials: StudyMaterialBundle) => void;
+  setEditalBancaProfile: (
+    id: string,
+    profile: BancaEditalProfile,
+    enrichedCurriculum?: SubjectData[]
+  ) => void;
+  updateTopicBancaAnalysis: (
+    editalId: string,
+    subjectId: string,
+    topicId: string,
+    analysis: TopicBancaAnalysis
+  ) => void;
+  setCurriculum: (id: string, curriculum: SubjectData[]) => void;
 }
 
 export const useCurriculumStore = create<CurriculumState>()(
@@ -442,6 +510,7 @@ export const useCurriculumStore = create<CurriculumState>()(
                     ...dbEd,
                     banca: dbEd.banca || curr?.banca || "FGV",
                     studyMaterials: dbEd.studyMaterials || curr?.studyMaterials,
+                    bancaProfile: dbEd.bancaProfile || curr?.bancaProfile,
                   });
                 });
                 const merged = Array.from(existingMap.values());
@@ -472,6 +541,7 @@ export const useCurriculumStore = create<CurriculumState>()(
               ...data.edital,
               banca: editalData.banca || data.edital?.banca || "FGV",
               studyMaterials: editalData.studyMaterials,
+              bancaProfile: editalData.bancaProfile,
             };
             set((state) => ({
               editais: [newEdital, ...state.editais.filter((e) => e.id !== newEdital.id)],
@@ -489,6 +559,7 @@ export const useCurriculumStore = create<CurriculumState>()(
               createdAt: new Date().toISOString(),
               curriculum: editalData.curriculum,
               studyMaterials: editalData.studyMaterials,
+              bancaProfile: editalData.bancaProfile,
             };
             set((state) => ({
               editais: [localEdital, ...state.editais],
@@ -507,6 +578,7 @@ export const useCurriculumStore = create<CurriculumState>()(
             createdAt: new Date().toISOString(),
             curriculum: editalData.curriculum,
             studyMaterials: editalData.studyMaterials,
+            bancaProfile: editalData.bancaProfile,
           };
           set((state) => ({
             editais: [localEdital, ...state.editais],
@@ -528,11 +600,62 @@ export const useCurriculumStore = create<CurriculumState>()(
         }));
       },
 
+      updateEditalBanca: (id, banca) => {
+        set((state) => ({
+          editais: state.editais.map((e) => (e.id === id ? { ...e, banca } : e)),
+        }));
+      },
+
       setEditalStudyMaterials: (id, materials) => {
         set((state) => ({
           editais: state.editais.map((e) =>
             e.id === id ? { ...e, studyMaterials: materials } : e
           ),
+        }));
+      },
+
+      setEditalBancaProfile: (id, profile, enrichedCurriculum) => {
+        set((state) => ({
+          editais: state.editais.map((e) => {
+            if (e.id !== id) return e;
+            return {
+              ...e,
+              banca: profile.bancaName || e.banca,
+              bancaProfile: profile,
+              curriculum: enrichedCurriculum || e.curriculum,
+            };
+          }),
+        }));
+      },
+
+      updateTopicBancaAnalysis: (editalId, subjectId, topicId, analysis) => {
+        set((state) => ({
+          editais: state.editais.map((ed) => {
+            if (ed.id !== editalId) return ed;
+            const updatedCurriculum = ed.curriculum.map((subj) => {
+              if (subj.id !== subjectId) return subj;
+              return {
+                ...subj,
+                topics: subj.topics.map((top) => {
+                  if (top.id !== topicId) return top;
+                  return {
+                    ...top,
+                    bancaAnalysis: analysis,
+                  };
+                }),
+              };
+            });
+            return {
+              ...ed,
+              curriculum: updatedCurriculum,
+            };
+          }),
+        }));
+      },
+
+      setCurriculum: (id, curriculum) => {
+        set((state) => ({
+          editais: state.editais.map((e) => (e.id === id ? { ...e, curriculum } : e)),
         }));
       },
 
@@ -577,6 +700,12 @@ export const useActiveEditalBanca = (): string => {
   return active?.banca || "FGV";
 };
 
+export const useActiveEditalBancaProfile = (): BancaEditalProfile | undefined => {
+  const activeId = useCurriculumStore((s) => s.activeEditalId);
+  const active = useCurriculumStore((s) => s.editais.find((e) => e.id === activeId));
+  return active?.bancaProfile || (activeId === "dataprev-2026" ? DEFAULT_DATAPREV_BANCA_PROFILE : activeId === "camara-dos-deputados" ? DEFAULT_CAMARA_BANCA_PROFILE : undefined);
+};
+
 export const useActiveEditalTitle = () => {
   const activeId = useCurriculumStore((s) => s.activeEditalId);
   return useCurriculumStore((s) => s.editais.find((e) => e.id === activeId)?.title || "Edital Desconhecido");
@@ -592,3 +721,4 @@ export const useActiveEditalMaterials = (): StudyMaterialBundle | undefined => {
   const active = useCurriculumStore((s) => s.editais.find((e) => e.id === activeId));
   return active?.studyMaterials || (activeId === "camara-dos-deputados" ? CAMARA_MATERIALS : DEFAULT_DATAPREV_MATERIALS);
 };
+
